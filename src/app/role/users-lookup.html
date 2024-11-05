@@ -1,0 +1,59 @@
+<div class='view-container'>
+  <div style="padding-bottom: 50px">
+    <form id='bankAdminsForm' name='bankAdminsForm' novalidate result-view='view2'>
+      <section class='row search-group'>
+        <label class='col s12 m6 search-input'>
+          <select (change)='onPageSizeChanged($event)'>
+            <option *ngFor='let p of pageSizes' [value]='p' [selected]='p === pageSize'>{{p}}</option>
+          </select>
+
+          <input type='text' id='q' name='q' maxlength='255' [(ngModel)]='filter.q' placeholder={{resource.user_id}} />
+          <button type='button' [hidden]='!filter.q' class='btn-remove-text' (click)='clearUserId()'> </button>
+          <button type='submit' class='btn-search' (click)='onSearch($event)'></button>
+        </label>
+        <pagination class='col s12 m6' id='pageIndex' name='pageIndex' *ngIf='showPaging' [(ngModel)]='pageIndex'
+          (pageChanged)='pageChanged($event)' [directionLinks]='false' [totalItems]='itemTotal' [maxSize]='pageMaxSize'
+          [itemsPerPage]='pageSize'>
+        </pagination>
+      </section>
+    </form>
+    <form class='list-result'>
+      <div class='table-responsive'>
+        <table>
+          <thead>
+            <tr>
+              <th>{{resource.sequence}}</th>
+              <th data-field='userId'><a id='sortUserId' (click)='sort($event)'>{{resource.user_id}}</a></th>
+              <th data-field='username'><a id='sortUsername' (click)='sort($event)'>{{resource.username}}</a></th>
+              <th data-field='email'><a id='sortEmail' (click)='sort($event)'>{{resource.email}}</a></th>
+              <th data-field='displayName'><a id='sortDisplayName' (click)='sort($event)'>{{resource.display_name}}</a>
+              </th>
+              <th data-field='status'><a id='sortStatus' (click)='sort($event)'>{{resource.status}}</a></th>
+              <th data-field='actionStatus'><a id='sortActionStatus'
+                  (click)='sort($event)'>{{resource.action_status}}</a>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of list;let i = index">
+              <ng-container>
+                <td class='text-right'>{{i}}</td>
+                <td>{{user.userId}}</td>
+                <td>{{user.username}}</td>
+                <td>{{user.email}}</td>
+                <td>{{user.displayName}}</td>
+                <td>{{user.status}}</td>
+                <td>
+                  <input type='checkbox' value='{{user.userId}}' (click)='onCheckUser($event)' />
+                </td>
+              </ng-container>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </form>
+  </div>
+  <footer>
+    <button type='submit' (click)='onModelSave()'>{{resource.select}}</button>
+  </footer>
+</div>

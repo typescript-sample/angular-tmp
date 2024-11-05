@@ -1,0 +1,194 @@
+<div class='sidebar-parent'
+  [ngClass]="{'sidebar-off': isToggleSidebar, 'menu-on': isToggleMenu, 'search': isToggleSearch}">
+  <div class='top-banner'>
+    <div class='logo-banner-wrapper'>
+      <img src='https://jacobspradlin.files.wordpress.com/2014/10/banner-people-connected.png' alt='Logo of The Company' />
+      <img src='https://jacobspradlin.files.wordpress.com/2014/10/banner-people-connected.png' class='banner-logo-title' alt='Logo of The Company' />
+    </div>
+  </div>
+  <!-- (mouseover)='onMouseHover($event)' -->
+  <div class='menu sidebar'>
+    <nav class="collapsed-all">
+      <ul>
+        <li>
+          <!-- <a class='toggle-menu'  (click)="toggleMenu()"></a> -->
+          <p class='sidebar-off-menu'>
+            <button class='toggle' (click)="toggleMenu()"></button>
+            <i class='expand' *ngIf="!isToggleSidebar" (click)='onShowAllMenu($event)'></i>
+            <i class='collapse' *ngIf="!isToggleSidebar" (click)='onHideAllMenu($event)'></i>
+          </p>
+        </li>
+        <li [class]="pinnedModuleParent.children?'open': ''"
+          *ngFor='let pinnedModuleParent of pinnedModules,let index = index'>
+          <div class='menu-item' (click)='toggleMenuItem($event)' *ngIf="pinnedModuleParent.children">
+            <button type='button' class='btn-pin pinned'
+              (click)='pinModulesHandler($event, index, pinnedModuleParent.sequence)'>
+            </button>
+            <i class="material-icons">{{pinnedModuleParent.icon}}</i><span>{{pinnedModuleParent.name}}</span>
+            <i class='entity-icon down' *ngIf='pinnedModuleParent.children'></i>
+          </div>
+          <a class='menu-item' (click)='toggleMenuItem($event)' *ngIf="!pinnedModuleParent.children">
+            <button type='button' class='btn-pin pinned'
+              (click)='pinModulesHandler($event, index, pinnedModuleParent.sequence)'>
+            </button>
+            <i class="material-icons">{{pinnedModuleParent.icon}}</i><span>{{pinnedModuleParent.name}}</span>
+            <i class='entity-icon down' *ngIf='pinnedModuleParent.children'></i>
+          </a>
+          <ul class='list-child expanded' *ngIf='pinnedModuleParent.children'>
+            <li>
+              <a type="button" class="menu-item" *ngFor='let moduleChild of pinnedModuleParent.children'
+                (click)='gotoURL(moduleChild.path)'>
+                <i class="material-icons">{{ moduleChild.icon}}</i>
+                <span>{{moduleChild.name}}</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li [class]="moduleParent.children?'open':''" *ngFor='let moduleParent of privileges, let index = index'>
+          <div class='menu-item' (click)='toggleMenuItem($event)' *ngIf="moduleParent.children">
+            <button type='button' class='btn-pin'
+              (click)='pinModulesHandler($event, index, moduleParent.sequence)'></button>
+            <i class="material-icons">{{moduleParent.icon}}</i><span>{{moduleParent.name}}</span>
+            <i class='entity-icon down' *ngIf='moduleParent.children'></i>
+          </div>
+          <a class='menu-item' (click)='toggleMenuItem($event)' *ngIf="!moduleParent.children">
+            <button type='button' class='btn-pin'
+              (click)='pinModulesHandler($event, index, moduleParent.sequence)'></button>
+            <i class="material-icons">{{moduleParent.icon}}</i><span>{{moduleParent.name}}</span>
+            <i class='entity-icon down' *ngIf='moduleParent.children'></i>
+          </a>
+          <ul class='list-child' *ngIf='moduleParent.children'>
+
+            <li>
+              <a class="menu-item" *ngFor='let moduleChild of moduleParent.children'
+                (click)='gotoURL(moduleChild.path)'>
+                <i class="material-icons">{{moduleChild.icon}}</i><span>{{moduleChild.name}}</span>
+              </a>
+            </li>
+
+          </ul>
+        </li>
+      </ul>
+    </nav>
+  </div>
+  <div class='page-container'>
+    <div class='page-header'>
+      <form>
+        <div class='search-group'>
+          <section>
+            <button type='button' class='toggle-menu' onclick='toggleMenu()'></button>
+            <button type='button' class='toggle-search' onclick='toggleSearch()'></button>
+            <button type='button' class='close-search' onclick='toggleSearch()'></button>
+          </section>
+          <div class='logo-wrapper'><img class='logo' src='assets/images/logo.png' alt='Logo of The Company' /></div>
+          <label class='search-input'>
+            <select>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="40">40</option>
+              <option value="60">60</option>
+              <option value="100">100</option>
+              <option value="200">200</option>
+              <option value="400">400</option>
+              <option value="10000">10000</option>
+            </select>
+            <input type='text' id='keyword' name='keyword' [(ngModel)]='se.keyword' placeholder='keyword'
+              resource-key='keyword' />
+            <button type='button' *ngIf='se.keyword' class='btn-remove-text' onclick='toggleSearch()'></button>
+            <button type='submit' class='btn-search' (click)='searchOnClick()'></button>
+          </label>
+          <section class='quick-nav'>
+            <!-- <button type='button'><i class='fa fa-bell-o' aria-hidden='true'></i></button>
+            <button type='button'><i class='fa fa-envelope-o'></i></button> -->
+            <a ><i class='material-icons'>home</i></a>
+            <div class="dropdown-menu-profile">
+              <i id='btnProfile' class='material-icons' (click)="toggleMenuProfile()">person</i>
+              <ul id='dropdown-basic' [class]="classProfile +' dropdown-content-profile'" aria-labelledby='btnProfile'
+                *ngIf="user">
+               
+                <li (click)="changeMenu()" class="menu">
+                  <ng-container *ngIf="isTopMenu()===true">
+                    <i class='material-icons'>view_list</i><span
+                      class='dropdown-item-profile'>{{resource.sidebar}}</span>
+                  </ng-container>
+                  <ng-container *ngIf="isTopMenu()===false">
+                    <i class='material-icons'>credit_card</i><span
+                      class='dropdown-item-profile'>{{resource.menu}}</span>
+                  </ng-container>
+                </li>
+                <li (click)="changeClassicMenu()" class="classic-menu">
+                  <ng-container *ngIf="isClassicMenu()">
+                    <i class='material-icons'>assessment</i><span class='dropdown-item-profile'>{{resource.modern_menu}}</span>
+                  </ng-container>
+                  <ng-container *ngIf="!isClassicMenu()">
+                    <i class='material-icons'>credit_card</i><span class='dropdown-item-profile'>{{resource.classic_menu}}</span>
+                  </ng-container>
+                </li>
+                <hr style="margin: 0" />
+                <li (click)="changeMode()">
+                  <ng-container *ngIf="isDarkMode()===true">
+                    <i class='material-icons'>radio_button_checked</i><span
+                      class='dropdown-item-profile'>{{resource.light_mode}}</span>
+                  </ng-container>
+                  <ng-container *ngIf="isDarkMode()===false">
+                    <i class='material-icons'>timelapse</i><span
+                      class='dropdown-item-profile'>{{resource.dark_mode}}</span>
+                  </ng-container>
+                </li>
+                <hr style="margin: 0" />
+                <li><i class='material-icons'>account_circle</i><a class='dropdown-item-profile'
+                    (click)='viewMyProfile()'>{{username}}</a></li>
+
+                <li><i class='material-icons'>settings</i><a class='dropdown-item-profile'
+                    (click)='viewMySettings()'>{{resource.my_settings}}</a></li>
+                <hr style="margin: 0" />
+                <li><i class='material-icons'>exit_to_app</i><a class='dropdown-item-profile'
+                    (click)='signout()'>{{resource.button_signout}}</a></li>
+              </ul>
+              <ul id='dropdown-basic' [class]="classProfile +' dropdown-content-profile'" aria-labelledby='btnProfile'
+                *ngIf="!user">
+                <li (click)="changeMenu()" class="menu">
+                  <ng-container *ngIf="isTopMenu()===true">
+                    <i class='material-icons'>view_list</i><span
+                      class='dropdown-item-profile'>{{resource.sidebar}}</span>
+                  </ng-container>
+                  <ng-container *ngIf="isTopMenu()===false">
+                    <i class='material-icons'>credit_card</i><span
+                      class='dropdown-item-profile'>{{resource.menu}}</span>
+                  </ng-container>
+                </li>
+                <li (click)="changeClassicMenu()" class="classic-menu">
+                  <ng-container *ngIf="isClassicMenu()">
+                    <i class='material-icons'>assessment</i><span class='dropdown-item-profile'>{{resource.modern_menu}}</span>
+                  </ng-container>
+                  <ng-container *ngIf="!isClassicMenu()">
+                    <i class='material-icons'>credit_card</i><span class='dropdown-item-profile'>{{resource.classic_menu}}</span>
+                  </ng-container>
+                </li>
+                <hr style=" margin: 0 " />
+                <li (click)="changeMode()">
+                  <!-- <a class='dropdown-item-profile' href="javascript:void(0)"> -->
+                  <ng-container *ngIf="isDarkMode()===true">
+                    <i class='material-icons'>radio_button_checked</i><span
+                      class='dropdown-item-profile'>{{resource.light_mode}}</span>
+                  </ng-container>
+                  <ng-container *ngIf="isDarkMode()===false">
+                    <i class='material-icons'>timelapse</i><span
+                      class='dropdown-item-profile'>{{resource.dark_mode}}</span>
+                  </ng-container>
+                  <!-- </a> -->
+                </li>
+                <hr style="margin: 0" />
+                <li><i class='material-icons'>account_circle</i><a class='dropdown-item-profile' href="/" >{{resource.signin}}</a></li>
+
+              </ul>
+            </div>
+          </section>
+        </div>
+      </form>
+    </div>
+    <div class='page-body'>
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

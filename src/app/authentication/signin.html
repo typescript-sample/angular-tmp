@@ -1,0 +1,39 @@
+﻿<div class='view-container central-full'>
+  <form id='signinForm' name='signinForm' novalidate autocomplete='off'>
+    <div>
+      <img class='logo' src='assets/images/logo.png'>
+      <h2>{{resource['signin']}}</h2>
+      <div [className]='"message " + alertClass'>
+        {{message}}
+        <span (click)='hideMessage()' [hidden]='!message || message == ""'></span>
+      </div>
+      <label>
+        {{resource['email']}}
+        <input type='text' id='username' name='username'
+               [(ngModel)]='user.username'
+               maxlength='255' required
+               placeholder="{{resource['placeholder_username']}}"/>
+      </label>
+      <label>
+        {{resource['password']}}
+        <input type='password' id='password' name='password'
+               [(ngModel)]='user.password'
+               maxlength='255' required
+               placeholder="{{resource['placeholder_password']}}">
+      </label>
+      <label className='col s12 checkbox-container'>
+        <input type='checkbox' id='remember' name='remember' [(ngModel)]='remember'>
+        {{resource['signin_remember_me']}}
+      </label>
+      <button type='submit' id='btnSignin' name='btnSignin' (click)='signin()'>
+        {{resource['button_signin']}}
+      </button>
+      <a id='btnForgotPassword' (click)='forgotPassword()'>
+        {{resource['forgot_password']}}
+      </a>
+      <a id='btnSignup' name='btnSignup' (click)='signup()'>
+        {{resource['button_signup']}}
+      </a>
+    </div>
+  </form>
+</div>

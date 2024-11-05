@@ -1,0 +1,70 @@
+<div class='view-container'>
+  <form id='roleAssignmentForm' name='roleAssignmentForm' model-name='role'>
+    <header>
+      <button type='button' id='btnBack' name='btnBack' class='btn-back'></button>
+      <h2>{{resource.role_assignment_subject}}</h2>
+    </header>
+    <div>
+      <section class='row'>
+        <label class='col s12 m6'>
+          {{resource.role_id}}
+          <input type='text' id='roleId' name='roleId' [value]='role.roleId' maxLength='255'
+            [placeholder]='resource.roleId' [disabled]='true' />
+        </label>
+        <label class='col s12 m6'>
+          {{resource.role_name}}
+          <input type='text' id='roleName' name='roleName' [value]='role.roleName' maxLength='255'
+            [placeholder]='resource.role_name' [disabled]='true' />
+        </label>
+      </section>
+      <section class='row detail'>
+        <h4>
+          {{resource.user}}
+          <div class='btn-group'>
+            <button type='button' (click)='reuseModal.open()'>{{resource.add}}</button>
+            <button type='button' (click)='onShowCheckBox()'>{{isCheckboxShown ? resource.deselect :
+              resource.select}}</button>
+            <button *ngIf='isCheckboxShown' type='button' (click)='onCheckAll()'>{{resource.check_all}}</button>
+            <button *ngIf='isCheckboxShown' type='button' (click)='onUnCheckAll()'>{{resource.uncheck_all}}</button>
+            <button *ngIf='isCheckboxShown' type='button' (click)='onDelete()'>{{resource.delete}}</button>
+          </div>
+        </h4>
+        <label class='col s12 search-input'>
+          <i class='btn-search'></i>
+          <input type='text' id='q' name='q' (change)="onSearch($event)" [value]="q" [maxLength]="40"
+            [placeholder]="resource.role_assignment_search_user" />
+        </label>
+        <ul class='row list-view'>
+          <li class='col s12 m6 l4 xl3' *ngFor='let user of users; let i = index'>
+            <section>
+              <input *ngIf="isCheckboxShown && user" type='checkbox' name='selected' (change)="onCheck(user.userId)"
+                [checked]='isChecked(this.selectedUsers, user.userId)' />
+              <img class='round-border'
+                src='{{user.gender === "M" ? "assets/images/male.png" : "assets/images/female.png" }}' />
+              <div>
+                <h3>{{user.displayName}}</h3>
+                <p>{{user.email}}</p>
+              </div>
+              <button class="btn-detail"></button>
+            </section>
+          </li>
+        </ul>
+      </section>
+    </div>
+    <footer>
+      <button type='submit' id='btnSave' name='btnSave' (click)="save($event)">{{resource.save}}</button>
+    </footer>
+  </form>
+  <app-modal #reuseModal role="dialog">
+    <ng-template #header>
+      <header class='modal-portal-header'>
+        <h2>{{resource.users_lookup}}</h2>
+        <button id='btnClose' name='btnClose' class='btn-close' (click)='reuseModal.close()'></button>
+      </header>
+    </ng-template>
+    <ng-template #body>
+      <app-users-lookup [selectedUsers]='users' (closeModalFn)="reuseModal.close()"
+        (onSave)="onModelSave($event)"></app-users-lookup>
+    </ng-template>
+  </app-modal>
+</div>

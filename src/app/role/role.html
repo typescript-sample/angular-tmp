@@ -1,0 +1,105 @@
+<div class='view-container'>
+  <form id='roleForm' model-name='role' name='roleForm' novalidate>
+    <header>
+      <button type='button' id='btnBack' name='btnBack' class='btn-back' (click)='back($event)'></button>
+      <h2>{{newMode ? resource.create : resource.edit}} {{resource.role}} </h2>
+      <button class="btn-group btn-right"><i (click)="assign($event, role.roleId)"
+          class="material-icons">group</i></button>
+    </header>
+    <div>
+      <section class='row'>
+        <label class='col s12 m6'>
+          {{resource.role_id}}
+          <input type='text' id='roleId' name='roleId' [(ngModel)]='role.roleId' [value]="role.roleId" maxlength='255'
+            required [readOnly]="!newMode" placeholder='{{resource.role_id}}'>
+        </label>
+        <label class='col s12 m6'>
+          {{resource.role_name}}
+          <input type='text' id='roleName' name='roleName' [(ngModel)]='role.roleName' [value]="role.roleName"
+            maxlength='255' required placeholder='{{resource.role_name}}' />
+        </label>
+        <label class='col s12 m6'>
+          {{resource.remark}}
+          <input type='text' id='roleDesc' name='roleDesc' [(ngModel)]='role.remark' [value]="role.remark"
+            maxlength='255' required placeholder='{{resource.remark}}'>
+        </label>
+        <label class='col s12 m4 l4 checkbox-section'>
+          {{resource.status}}
+          <section class='checkbox-group'>
+            <label *ngFor='let item of statusList; let i = index'>
+              <input type='radio' [id]='item.value' name='status' [value]='item.value'
+                [checked]="role.status === item.value" [(ngModel)]='role.status' />
+              {{item.text}}
+            </label>
+          </section>
+        </label>
+      </section>
+      <h4>
+        <label>
+          <input type='checkbox' value='all' name='moduleId' (disabled)='isReadOnly || keyword !="" '
+            [checked]='checkedAll' (change)='handleCheckAllModule($event, role.privileges, all, actions)' />
+          {{resource.all_privileges}}
+        </label>
+        <label class='col s12 search-input'>
+          <i class='btn-search'></i>
+          <input type='text' id='keyword' name='keyword' maxLength='40' placeholder={{resource.role_filter_modules}}
+            (keyup)='onChangeKeyword($event)' />
+        </label>
+        <p class="col s1 m2 center">{{resource.read}}</p>
+        <p class="col s1 m2 center">{{resource.write}}</p>
+        <p class="col s1 m2 center">{{resource.delete}}</p>
+      </h4>
+      <section class='row'>
+        <section class='col s12'>
+          <!-- Initiate the recursive template rendering. -->
+          <ng-container *ngFor='let node of shownPrivileges'>
+            <ng-template [ngTemplateOutlet]="nodeTemplateRef"
+              [ngTemplateOutletContext]="{ node, parentId: '', disabled: isReadOnly || keyword !== '' }">
+            </ng-template>
+          </ng-container>
+
+          <ng-template #nodeTemplateRef let-node="node" let-parentId="parentId" let-disabled="disabled"
+            let-isChild="isChild">
+            <ng-container *ngIf='node && node.children && node.children.length >0'>
+              <div class='row checkbox-group'>
+                <label [class]='isChild ? "col s6 m4 l3" : "checkbox-container"'>
+                  {{node.name}}
+                  <input type='checkbox' [id]='node.id' [name]='node.id' [disabled]='disabled'
+                    [checked]="isParentChecked(node.id, node.children, privileges)"
+                    (change)='handleCheckParent($event, node.id)' />
+                </label>
+                <section class='row checkbox-group'>
+                  <ng-template ngFor let-child [ngForOf]="node.children">
+                    <ng-template [ngTemplateOutlet]="nodeTemplateRef"
+                      [ngTemplateOutletContext]="{ node: child, parentId: node.id, disabled, isChild: true }">
+                    </ng-template>
+                  </ng-template>
+                </section>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="!node.children">
+              <div class='row checkbox-group'>
+                <label class="col s6 m4 l3">
+                  {{node.name}}
+                  <input type='checkbox' [id]='node.id' [name]='node.id' [value]='node.actions' [disabled]='disabled'
+                    [checked]="isChecked(node.id, privileges)"
+                    (change)='handleCheckBox($event, node.id, parentId, node, true)' />
+                </label>
+                <ng-container *ngFor='let item of getColumnsOfRow(node.actions)'>
+                  <label class="col checkbox-group s1 m2 center">
+                    <input type='checkbox' [id]='item.action' [name]='item.action' [value]='item.action'
+                      [disabled]='disabled' [checked]="checked(node.id, item.action, privileges)"
+                      (change)='handleCheckBox($event, node.id, parentId, node)' />
+                  </label>
+                </ng-container>
+              </div>
+            </ng-container>
+          </ng-template>
+        </section>
+      </section>
+    </div>
+    <footer>
+      <button type='submit' id='btnSave' name='btnSave' (click)='save($event)'>{{resource.save}}</button>
+    </footer>
+  </form>
+</div>

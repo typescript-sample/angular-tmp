@@ -1,0 +1,55 @@
+@import './assets/css/reset.css';
+@import './assets/fonts/material-icon/css/material-icons.css';
+@import './assets/css/checkbox.css';
+@import './assets/css/radio.css';
+@import './assets/css/grid.css';
+@import './assets/css/alert.css';
+@import './assets/css/loader.css';
+@import './assets/css/main.css';
+@import './assets/css/modal.css';
+@import './assets/css/multi-select.css';
+@import './assets/css/date-picker.css';
+@import './assets/css/form.css';
+@import './assets/css/diff.css';
+@import './assets/css/group.css';
+@import './assets/css/article.css';
+@import './assets/css/list-view.css';
+@import './assets/css/table.css';
+@import './assets/css/list-detail.css';
+@import './assets/css/navigation.css';
+@import './assets/css/pagination.css';
+@import './assets/css/solid-container.css';
+@import './assets/css/button.css';
+@import './assets/css/search.css';
+@import './assets/css/layout.css';
+@import './assets/css/profile.css';
+@import './assets/css/theme.css';
+@import './assets/css/dark.css';
+
+@import url('http://fonts.cdnfonts.com/css/roboto');
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', 'Segoe UI', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+body {
+  height: 100%;
+  width: 100%;
+  font-family: 'Roboto';
+  -webkit-overflow-scrolling: touch;
+  margin: 0;
+  padding: 0;
+}
+* {
+  font-family: "Roboto";
+  scrollbar-width: thin;
+}

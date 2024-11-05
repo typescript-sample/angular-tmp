@@ -1,0 +1,106 @@
+<div class='view-container'>
+  <header>
+    <h2>{{resource.role_list}}</h2>
+    <div class='btn-group'>
+      <button *ngIf="view !== 'table'" type='button' id='btnTable' name='btnTable' class='btn-table'
+        (click)="changeView('table')"></button>
+      <button *ngIf="view === 'table'" type='button' id='btnListView' name='btnListView' class='btn-list-view'
+        (click)="changeView('listview')"></button>
+      <button *ngIf="addable" type='button' class='btn-new' id='btnNew' (click)='addRole()'></button>
+    </div>
+  </header>
+  <div>
+    <form id='rolesForm' name='rolesForm' novalidate>
+      <section class='row search-group'>
+        <label class='col s12 m6 search-input'>
+          <!-- <section class='btn-group'>
+            <label>
+              {{resource.page_size}}
+              <select (change)='onPageSizeChanged($event)'>
+                <option *ngFor='let p of pageSizes' [value]='p' [selected]='p === pageSize'>{{p}}</option>
+              </select>
+            </label>
+          </section>  -->
+
+          <select (change)='onPageSizeChanged($event)'>
+            <option *ngFor='let p of pageSizes' [value]='p' [selected]='p === pageSize'>{{p}}</option>
+          </select>
+          <input type='text' id='q' name='q' maxlength='255' [(ngModel)]='filter.q' [placeholder]="resource.keyword" />
+          <button type='button' [hidden]="!filter.q" class='btn-remove-text' (click)="clearQ()"></button>
+          <button type='button' class='btn-filter' (click)="toggleFilter($event)"></button>
+          <button type='submit' class='btn-search' (click)="search($event)"></button>
+        </label>
+        <pagination id='limit1' name='limit' *ngIf='showPaging' [(ngModel)]='pageIndex'
+          (pageChanged)='onPageChanged($event)' (numPages)='pageIndex = $event' [directionLinks]='false'
+          [totalItems]='itemTotal' [maxSize]='pageMaxSize' [itemsPerPage]='pageSize'></pagination>
+      </section>
+      <section class="row search-group inline" [hidden]="hideFilter">
+        <label class='col s12 m6'>
+          {{resource.role_name}}
+          <input type='text' id='roleName' name='roleName' [(ngModel)]="filter.roleName" maxLength="240"
+            [placeholder]="resource.role_name" />
+        </label>
+        <label class='col s12 m6'>
+          {{resource.status}}
+          <section class='checkbox-group'>
+            <label>
+              <input type='checkbox' id='active' name='status' value='A' [checked]="includes(filter.status, 'A')"
+                (change)='updateState($event)' />{{resource.active}}
+            </label>
+            <label>
+              <input type='checkbox' id='inactive' name='status' value='I' [checked]="includes(filter.status, 'I')"
+                (change)='updateState($event)' />
+              {{resource.inactive}}
+            </label>
+            <!-- <label *ngFor='let item of status; let i = index'>
+              <input [id]='item.value' type='checkbox' name='status' [checked]="includes(filter.status,item.value)"
+                [value]="item.value" (change)='updateState($event)' />
+              {{item.text}}
+            </label> -->
+          </section>
+        </label>
+      </section>
+
+    </form>
+    <form class='list-result'>
+      <div *ngIf="view === 'table' && list && list.length > 0" class='table-responsive'>
+        <table>
+          <thead>
+            <tr>
+              <!-- <th>{{resource.sequence}}</th> -->
+              <th data-field='roleId'><button type='button' id='sortRoleId'
+                  (click)="sort($event)">{{resource.role_id}}</button></th>
+              <th data-field='roleName'><button type='button' id='sortRoleName'
+                  (click)="sort($event)">{{resource.role_name}}</button></th>
+              <th data-field='remark'><button type='button' id='sortRemark'
+                  (click)="sort($event)">{{resource.remark}}</button></th>
+              <th data-field='status'><button type='button' id='sortStatus'
+                  (click)="sort($event)">{{resource.status}}</button></th>
+            </tr>
+          </thead>
+          <tr *ngFor="let item of list;let i = index" (click)="edit(item.roleId)">
+            <td>{{item.roleId}}</td>
+            <td>{{item.roleName}}</td>
+            <td>{{item.remark}}</td>
+            <td>{{item.status}}</td>
+          </tr>
+        </table>
+      </div>
+      <ul *ngIf="view !== 'table' && list && list.length > 0" class='row list-view'>
+        <li *ngFor="let item of list;let i = index" class='col s12 m6 l4 xl3' (click)="edit(item.roleId)">
+          <section>
+            <div>
+              <h3 [class]='item.status === "I" ? "inactive" : ""'>{{item.roleName}}</h3>
+              <p>{{item.remark}}</p>
+            </div>
+            <button class='btn-detail'></button>
+
+          </section>
+        </li>
+      </ul>
+    </form>
+    <div class='form-group col s12 m6 l6'>
+
+    </div>
+  </div>
+</div>

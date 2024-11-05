@@ -1,0 +1,54 @@
+<!-- <div class='slider'>
+    
+        <ng-container *ngIf="children.length>1">
+          <span id='btn-prev' (click)="prev">
+            &lt;
+          </span>
+          <span id='btn-next' (click)="next">
+            &gt;
+          </span>
+        </ng-container>
+    <div
+      class='slider-content-wrapper'
+      [ref]="slideContentWrap"
+      [onTouchStart]="handleTouchStart"
+      [onTouchMove]="handleTouchMove"
+    >
+      <div
+        class='slider-container'
+        [ref]="sliderContainer"
+        onTransitionEnd={() => handleTransitionEnd()}
+      >
+        {infiniteLoop &&
+          <div
+            class='slider-items'
+            id='lastClone'
+          >
+            {children[children.length - 1]}
+          </div>
+        }
+        {children.map((item: ReactNode, index: number) => (
+          <div class='slider-items' key={`slider-items-${index}`}>
+            {item}
+          </div>
+        )
+        )}
+        {infiniteLoop &&
+          <div
+            class='slider-items'
+            id='firstClone'
+          >
+            {children[0]}
+          </div>
+        }
+      </div>
+    </div>
+    <div class='slider-dots'>
+      {
+         children.map((item, index) => (
+            <button key={index} (click)="handleDots(index)">
+              {index}
+            </button>
+          ))}
+    </div>
+  </div> -->

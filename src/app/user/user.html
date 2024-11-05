@@ -1,0 +1,76 @@
+﻿<div class='view-container'>
+  <form id='userForm' name='userForm' novalidate>
+    <header>
+      <button type='button' class='btn-back' (click)='back($event)'></button>
+      <h2>{{resource.user}}</h2>
+    </header>
+    <div class='row'>
+      <label class='col s12 m6'>
+        {{resource.user_id}}
+        <input type='text' id='userId' name='userId' [(ngModel)]='user.userId' (blur)='requiredOnBlur($event)'
+          maxlength='255' required [placeholder]='resource.user_id' />
+      </label>
+      <label class='col s12 m6'>
+        {{resource.display_name}}
+        <input type='text' id='displayName' name='displayName' [(ngModel)]='user.displayName' maxLength='40'
+          required='true' [placeholder]='resource.display_name' />
+      </label>
+      <label class='col s12 m6'>
+        {{resource.phone}}
+        <input type='text' id='phone' name='phone' [value]='user.phone' [(ngModel)]='user.phone'
+          (blur)="phoneOnBlur($event)" maxlength="17" [placeholder]='resource.phone' />
+      </label>
+      <label class='col s12 m6'>
+        {{resource.email}}
+        <input type='text' id='email' name='email' [(ngModel)]='user.email' (blur)='emailOnBlur($event)' maxlength="100"
+          [placeholder]='resource.email' />
+      </label>
+      <label class='col s12 m6'>
+        {{resource.person_title}}
+        <select id='title' name='title' [(ngModel)]='user.title' value='{{user.title}}' (change)="loadGender()"
+          class="custom-select">
+          <option *ngFor="let item of titles" [value]="item.value">{{item.text}}</option>
+        </select>
+      </label>
+      <label class='col s12 m6'>
+        {{resource.position}}
+        <select id='position' name='position' [(ngModel)]='user.position' value='{{user.position}}'
+          class="custom-select">
+          <option selected='true' value=''>{{resource.please_select}}</option>
+          <option *ngFor="let item of positions" [value]="item.value">{{item.text}}</option>
+        </select>
+      </label>
+      <label class='col s12 m6'>
+        {{resource.gender}}
+        <div className='radio-group'>
+          <label>
+            <input type='radio' id='genderMale' name='gender' value='M' [(ngModel)]='user.gender'
+              [disabled]='user.title !== "Dr"' />
+            {{resource.male}}
+          </label>
+          <label>
+            <input type='radio' id='genderFemale' name='gender' value='F' [(ngModel)]='user.gender'
+              [disabled]='user.title !== "Dr"' />
+            {{resource.female}}
+          </label>
+        </div>
+      </label>
+      <div class='col s12 m6 radio-section'>
+        {{resource.status}}
+        <div className='radio-group'>
+          <label>
+            <input type='radio' id='active' name='status' [(ngModel)]='user.status' value='A' />
+            {{resource.yes}}
+          </label>
+          <label>
+            <input type='radio' id='inactive' name='status' [(ngModel)]='user.status' value='I' />
+            {{resource.no}}
+          </label>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <button type='submit' id='btnSave' name='btnSave' (click)='save($event)'>{{resource.save}}</button>
+    </footer>
+  </form>
+</div>

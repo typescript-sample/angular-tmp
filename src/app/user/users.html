@@ -1,0 +1,95 @@
+﻿<div class='view-container'>
+  <header>
+    <h2>{{resource.users}}</h2>
+    <div class='btn-group'>
+      <button *ngIf="view !== 'table'" type='button' id='btnTable' name='btnTable' class='btn-table'
+        (click)="changeView('table')"></button>
+      <button *ngIf="view === 'table'" type='button' id='btnListView' name='btnListView' class='btn-list-view'
+        (click)="changeView('listview')"></button>
+      <button *ngIf="addable" type='button' id='btnNew' name='btnNew' class='btn-new' (click)="add()"></button>
+    </div>
+  </header>
+  <div>
+    <form id='usersForm' name='usersForm' novalidate>
+      <section class='row search-group'>
+        <label class='col s12 m4 search-input'>
+          <select (change)='onPageSizeChanged($event)'>
+            <option *ngFor='let p of pageSizes' [value]='p' [selected]='p === pageSize'>{{p}}</option>
+          </select>
+          <input type='text' id='q' name='q' [(ngModel)]='filter.q' maxlength='1000'
+            placeholder='{{resource.keyword}}' />
+          <button type='button' [hidden]="!filter.q" class='btn-remove-text' (click)="clearQ()"></button>
+          <button type='button' class='btn-filter' (click)="toggleFilter($event)"></button>
+          <button type='submit' class='btn-search' (click)='search($event)'></button>
+        </label>
+        <pagination class='col s12 m8' id='pageIndex' name='pageIndex' *ngIf='showPaging' [(ngModel)]='pageIndex'
+          (pageChanged)='onPageChanged($event)' (numPages)='pageIndex = $event' [directionLinks]='false'
+          [totalItems]='itemTotal' [maxSize]='pageMaxSize' [itemsPerPage]='pageSize'></pagination>
+      </section>
+      <section class='row search-group inline' [hidden]="hideFilter">
+        <label class='col s12 m4 l4'>
+          {{resource.username}}
+          <input type='text' id='username' name='username' [value]='filter.username' [(ngModel)]='filter.username'
+            maxLength='255' placeholder='{{resource.username}}' />
+        </label>
+        <label class='col s12 m4 l4'>
+          {{resource.display_name}}
+          <input type='text' id='displayName' name='displayName' [value]='filter.displayName'
+            [(ngModel)]='filter.displayName' maxLength='255' placeholder='{{resource.display_name}}' />
+        </label>
+        <label class='col s12 m4 l4 checkbox-section'>
+          {{resource.status}}
+          <section class='checkbox-group'>
+            <label *ngFor="let item of statusList">
+              <input type='checkbox' (id)='item.title' (name)='item.title' (value)='item.value'
+                (change)='onStatusChanged($event, item.value)' [checked]="includes(filter.status, item.value)" />
+              {{item.title}}
+            </label>
+          </section>
+        </label>
+      </section>
+    </form>
+    <form class='list-result'>
+      <div *ngIf="view === 'table' && list && list.length > 0" class='table-responsive'>
+        <table>
+          <thead>
+            <tr>
+              <!-- <th>{{resource.sequence}}</th> -->
+              <th data-field='userId'><button type='button' id='sortUserId'
+                  (click)="sort($event)">{{resource.user_id}}</button></th>
+              <th data-field='username'><button type='button' id='sortUserName'
+                  (click)="sort($event)">{{resource.username}}</button></th>
+              <th data-field='email'><button type='button' id='sortEmail'
+                  (click)="sort($event)">{{resource.email}}</button></th>
+              <th data-field='displayname'><button type='button' id='sortDisplayName'
+                  (click)="sort($event)">{{resource.display_name}}</button></th>
+              <th data-field='status'><button type='button' id='sortStatus'
+                  (click)="sort($event)">{{resource.status}}</button></th>
+            </tr>
+          </thead>
+          <tr *ngFor="let item of list;let i = index" (click)="edit(item.userId)">
+            <td>{{item.userId}}</td>
+            <td>{{item.username}}</td>
+            <td>{{item.email}}</td>
+            <td>{{item.displayName}}</td>
+            <td>{{item.status}}</td>
+          </tr>
+        </table>
+      </div>
+      <ul *ngIf="view !== 'table' && list && list.length > 0" class='row list-view'>
+        <li *ngFor="let item of list;let i = index" class='col s12 m6 l4 xl3' (click)="edit(item.userId)">
+          <section>
+            <img
+              [src]='item.imageURL && item.imageURL.length > 0 ? item.imageURL : (item.gender === "F" ? femaleIcon : maleIcon)'
+              class='round-border' />
+            <div>
+              <h3 (click)="edit(item.userId)">{{item.displayName}}</h3>
+              <p>{{item.email}}</p>
+            </div>
+            <button class='btn-detail'></button>
+          </section>
+        </li>
+      </ul>
+    </form>
+  </div>
+</div>
