@@ -1,6 +1,6 @@
 ﻿import { Component, OnInit, ViewContainerRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { StringMap, clone, createModel, initElement, isSuccessful, makeDiff, setReadOnly } from 'angularx';
+import { StringMap, clone, createModel, hasDiff, initElement, isEmptyObject, isSuccessful, makeDiff, setReadOnly } from 'angularx';
 import { emailOnBlur, formatter, numberOnFocus, phoneOnBlur, registerEvents, requiredOnBlur, showFormError, validateForm } from 'ui-plus';
 import { Status,handleError, hasPermission, useLocale, useResource, write } from 'uione';
 import { Gender } from 'uione';
@@ -9,7 +9,6 @@ import { User, UserClient } from './service/user';
 import { Item, Result } from 'onecore';
 import { hideLoading, showLoading } from 'ui-loading';
 import { alertError, alertSuccess, alertWarning, confirm } from 'ui-alert';
-import { hasDiff } from '../core';
 
 function createUser(): User {
   const user = createModel<User>();
@@ -122,8 +121,7 @@ export class UserComponent implements OnInit {
             .finally(hideLoading)
         } else {
           const diff = makeDiff(this.originUser, this.user, ["userId"])
-          const l = Object.keys(diff as any).length
-          if (l === 0) {
+          if (isEmptyObject(diff)) {
             alertWarning(this.resource.msg_no_change)
           } else {
             showLoading()

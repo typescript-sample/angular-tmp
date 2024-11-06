@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { addParametersIntoUrl, append, buildMessage, changePage, changePageSize, clone, enLocale, error, formatResults, getFields, handleAppend, handleSortEvent, initElement, initFilter, Locale, optimizeFilter, reset, SearchResult, showPaging } from 'angularx';
+import { addParametersIntoUrl, append, buildFilter, buildMessage, changePage, changePageSize, clone, enLocale, error, formatResults, getFields, handleAppend, handleSortEvent, initElement, initFilter, Locale, optimizeFilter, reset, SearchResult, showPaging } from 'angularx';
 import { hideLoading, showLoading } from 'ui-loading';
 import { getLocale, handleError, inputSearch, registerEvents, SearchParameter, showMessage, storage, StringMap, useResource } from 'uione';
 import { User, UserClient, UserFilter } from './service/user';
@@ -93,7 +93,7 @@ export class UsersLookupComponent implements OnInit {
       const obj2 = this.searchParam.ui.decodeFromForm(sf, this.locale, this.getCurrencyCode());
       obj = obj2 ? obj2 : {};
     }
-    const obj3 = optimizeFilter(obj, this, this.getFields());
+    const obj3 = buildFilter(obj, this, this.getFields());
     if (this.excluding) {
       obj3.excluding = this.excluding;
     }
@@ -281,7 +281,7 @@ export class UsersLookupComponent implements OnInit {
       com.setList(results);
       com.tmpPageIndex = s.page;
       if (s.limit) {
-        showMessage(buildMessage(this.searchParam.resource, s.page, s.limit, sr.list, sr.total));
+        showMessage(buildMessage(this.resource, s.page, s.limit, sr.list, sr.total));
       }
     }
     this.running = false;

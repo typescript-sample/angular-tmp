@@ -180,7 +180,7 @@ export class RolesComponent implements OnInit {
       this.list = results;
       com.tmpPageIndex = s.page;
       if (s.limit) {
-        showMessage(buildMessage(this.searchParam.resource, s.page, s.limit, sr.list, sr.total));
+        showMessage(buildMessage(this.resource, s.page, s.limit, sr.list, sr.total));
       }
     }
     this.running = false;

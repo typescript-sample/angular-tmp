@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewContainerRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { StringMap, initElement, navigate, clone, isSuccessful, makeDiff } from 'angularx';
+import { StringMap, initElement, navigate, clone, isSuccessful, makeDiff, hasDiff, isEmptyObject } from 'angularx';
 import { Status, handleError, useResource, hasPermission, write, getLocale, confirm } from 'uione';
 import { MasterDataClient } from './service/master-data';
 import { Privilege, Role, RoleClient } from './service/role';
@@ -8,7 +8,6 @@ import { registerEvents, showFormError, validateForm } from 'ui-plus';
 import { hideLoading, showLoading } from 'ui-loading';
 import { alertError, alertSuccess, alertWarning } from 'ui-alert';
 import { Result, ValueText } from 'onecore';
-import { hasDiff, isEmptyObject } from '../core';
 
 interface ShownItem {
   action: number

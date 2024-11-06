@@ -1,11 +1,10 @@
 ﻿import { Component, OnInit, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { Locale, addParametersIntoUrl, buildFromUrl, changePage, changePageSize, clone, handleSortEvent, initElement, initFilter, mergeFilter, navigate, reset, showPaging} from 'angularx';
+import { addParametersIntoUrl, buildFromUrl, buildMessage, changePage, changePageSize, clone, getFields, getOffset, handleSortEvent, handleToggle, initElement, initFilter, mergeFilter, navigate, reset, showPaging} from 'angularx';
 import { Permission, StringMap, getStatusName, handleError, hasPermission, registerEvents, showMessage, storage, useResource } from 'uione';
 import { MasterDataClient } from './service/master-data';
 import { User, UserClient, UserFilter } from './service/user';
 import { hideLoading, showLoading } from 'ui-loading';
-import { buildMessage, getOffset, handleToggle, optimizeFilter } from '../core';
 import { ValueText } from 'onecore';
 
 interface StatusList {
@@ -41,9 +40,9 @@ export class UsersComponent implements OnInit {
   canWrite: boolean;
 
   hideFilter?: boolean;
-  ignoreUrlParam?: boolean;
   filter: UserFilter = {} as any;
   list: User[] = [];
+  fields?: string[];
 
   pageMaxSize = 7;
   pageSizes: number[] = [10, 20, 40, 60, 100, 200, 400, 1000];
@@ -71,11 +70,9 @@ export class UsersComponent implements OnInit {
       this.statusList = initStatusList(status);
       const obj2 = initFilter(s, this);
       this.filter = obj2;
-      if (storage.autoSearch) {
-        setTimeout(() => {
-          this.search(true);
-        }, 0);
-      }
+      setTimeout(() => {
+        this.search(true);
+      }, 0);
     }).catch(handleError);
   }
   sort(event: Event): void {
@@ -95,26 +92,32 @@ export class UsersComponent implements OnInit {
     reset(this);
     this.search();
   }
+  /*
   getFilter(): UserFilter {
     let obj = this.filter;
     const obj3 = optimizeFilter(obj, this);
     return obj3
   }
+    */
   search(isFirstLoad?: boolean) {
     showLoading();
-    this.filter.page = this.pageIndex
+    debugger
+    this.filter.page = this.pageIndex;
     addParametersIntoUrl(this.filter, isFirstLoad);
     const offset = getOffset(this.pageSize, this.pageIndex);
-    const fields = this.filter.fields
     // const s = this.getFilter();    
+    if (!this.fields) {
+      this.fields = getFields(this.form);
+    }
     if (this.sortField && this.sortField.length > 0) {
       this.filter.sort = (this.sortType === '-' ? '-' + this.sortField : this.sortField);
     }
     delete this.filter.page;
     delete this.filter.limit;
     delete this.filter.fields;
+    
     this.userService
-      .search(this.filter, this.pageSize, offset, fields)
+      .search(this.filter, this.pageSize, offset, this.fields)
       .then((res) => {
         if (res.total) {
           this.itemTotal = res.total;
