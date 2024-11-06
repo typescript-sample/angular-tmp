@@ -23,8 +23,8 @@
           <button type='submit' class='btn-search' (click)='search($event)'></button>
         </label>
         <pagination class='col s12 m8' id='pageIndex' name='pageIndex' *ngIf='showPaging' [(ngModel)]='pageIndex'
-          (pageChanged)='onPageChanged($event)' (numPages)='pageIndex = $event' [directionLinks]='false'
-          [totalItems]='itemTotal' [maxSize]='pageMaxSize' [itemsPerPage]='pageSize'></pagination>
+          (pageChanged)='onPageChanged($event)' [directionLinks]='false' [totalItems]='itemTotal'
+          [maxSize]='pageMaxSize' [itemsPerPage]='pageSize'></pagination>
       </section>
       <section class='row search-group inline' [hidden]="hideFilter">
         <label class='col s12 m4 l4'>

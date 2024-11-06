@@ -1,6 +1,6 @@
 ﻿import { Component, OnInit, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { Locale, SearchComponent, SearchResult, addParametersIntoUrl, append, buildFromUrl, buildMessage, changePage, changePageSize, clone, formatResults, getModelName, handleAppend, handleSortEvent, handleToggle, initElement, initFilter, mergeFilter, navigate, reset, setValue, showPaging, valueOfCheckbox } from 'angularx';
+import { Locale, SearchComponent, SearchResult, addParametersIntoUrl, append, buildFromUrl, buildMessage, changePage, changePageSize, clone, formatResults, getModelName, handleAppend, handleSortEvent, handleToggle, initElement, initFilter, mergeFilter, navigate, optimizeFilter, reset, setValue, showPaging, valueOfCheckbox } from 'angularx';
 import { Permission, SearchParameter, StringMap, getStatusName, handleError, hasPermission, inputSearch, registerEvents, showMessage, storage, useLocale, useResource } from 'uione';
 import { MasterDataClient } from './service/master-data';
 import { User, UserClient, UserFilter } from './service/user';
@@ -100,7 +100,7 @@ export class UsersComponent implements OnInit {
     if (!this.ignoreUrlParam) {
       addParametersIntoUrl(this.filter, isFirstLoad);
     }
-    const s = clone(this.filter);
+    const s = this.getFilter();
     const next = getNextPageToken(this.filter);
     this.userService
       .search(this.filter, this.filter.limit, next, this.filter.fields)
@@ -110,7 +110,11 @@ export class UsersComponent implements OnInit {
       .catch(handleError)
       .finally(hideLoading)
   }
-
+  getFilter(): UserFilter {
+    let obj = this.filter;
+    const obj3 = optimizeFilter(obj, this);
+    return obj3
+  }
   showResults(s: UserFilter, sr: SearchResult<User>): void {
     const results = sr.list;
     this.pageIndex = (s.page && s.page >= 1 ? s.page : 1);
