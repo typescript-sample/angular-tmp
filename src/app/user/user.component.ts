@@ -2,14 +2,14 @@
 import { ActivatedRoute } from '@angular/router';
 import { StringMap, clone, createModel, initElement, isSuccessful, makeDiff, setReadOnly } from 'angularx';
 import { emailOnBlur, formatter, numberOnFocus, phoneOnBlur, registerEvents, requiredOnBlur, showFormError, validateForm } from 'ui-plus';
-import { Privilege, Status, getPath, getPrivilege, handleError, hasPermission, storage, useLocale, useResource, write } from 'uione';
+import { Status,handleError, hasPermission, useLocale, useResource, write } from 'uione';
 import { Gender } from 'uione';
 import { MasterDataClient } from './service/master-data';
 import { User, UserClient } from './service/user';
 import { Item, Result } from 'onecore';
 import { hideLoading, showLoading } from 'ui-loading';
 import { alertError, alertSuccess, alertWarning, confirm } from 'ui-alert';
-import { afterSaved, goBack, hasDiff } from '../core';
+import { hasDiff } from '../core';
 
 function createUser(): User {
   const user = createModel<User>();
@@ -105,12 +105,12 @@ export class UserComponent implements OnInit {
       confirm(this.resource.msg_confirm_back, () => window.history.back())
     }
   }
-  validate(user: User): boolean {
+  validate(): boolean {
     return validateForm(this.refForm, useLocale())
   }
   save(event: Event): void {
     event.preventDefault()
-    const valid = this.validate(this.user)
+    const valid = this.validate()
     if (valid) {
       confirm(this.resource.msg_confirm_save, () => {
         if (this.newMode) {

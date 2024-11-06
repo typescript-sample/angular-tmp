@@ -95,6 +95,51 @@ export class UsersComponent implements OnInit {
       }
     }).catch(handleError);
   }
+  
+  onPageSizeChanged(event: Event): void {
+    const ctrl = event.currentTarget as HTMLInputElement;
+    changePageSize(this, Number(ctrl.value));
+    this.tmpPageIndex = 1;
+    this.doSearch();
+  }
+  onPageChanged(event?: any): void {
+    if (this.loadTime) {
+      const now = new Date();
+      const d = Math.abs(this.loadTime.getTime() - now.getTime());
+      if (d < 610) {
+        if (event) {
+          if (event.page && event.itemsPerPage && event.page !== this.loadPage) {
+            changePage(this, this.loadPage, event.itemsPerPage);
+          }
+        }
+        return;
+      }
+    }
+    changePage(this, event.page, event.itemsPerPage);
+    this.doSearch();
+  }
+  sort(event: Event): void {
+    handleSortEvent(event, this);
+    if (!this.appendMode) {
+      this.doSearch();
+    } else {
+      this.resetAndSearch();
+    }
+  }
+  search(event: Event): void {
+    if (event && !this.form) {
+      const f = (event.currentTarget as HTMLInputElement).form;
+      if (f) {
+        this.form = f;
+      }
+    }
+    this.resetAndSearch();
+  }
+  getFilter(): UserFilter {
+    let obj = this.filter;
+    const obj3 = optimizeFilter(obj, this);
+    return obj3
+  }
   doSearch(isFirstLoad?: boolean) {
     showLoading();
     if (!this.ignoreUrlParam) {
@@ -109,11 +154,6 @@ export class UsersComponent implements OnInit {
       })
       .catch(handleError)
       .finally(hideLoading)
-  }
-  getFilter(): UserFilter {
-    let obj = this.filter;
-    const obj3 = optimizeFilter(obj, this);
-    return obj3
   }
   showResults(s: UserFilter, sr: SearchResult<User>): void {
     const results = sr.list;
@@ -169,44 +209,5 @@ export class UsersComponent implements OnInit {
         this.filter.status = checkedList;
       }
     }
-  }
-  onPageSizeChanged(event: Event): void {
-    const ctrl = event.currentTarget as HTMLInputElement;
-    changePageSize(this, Number(ctrl.value));
-    this.tmpPageIndex = 1;
-    this.doSearch();
-  }
-  onPageChanged(event?: any): void {
-    if (this.loadTime) {
-      const now = new Date();
-      const d = Math.abs(this.loadTime.getTime() - now.getTime());
-      if (d < 610) {
-        if (event) {
-          if (event.page && event.itemsPerPage && event.page !== this.loadPage) {
-            changePage(this, this.loadPage, event.itemsPerPage);
-          }
-        }
-        return;
-      }
-    }
-    changePage(this, event.page, event.itemsPerPage);
-    this.doSearch();
-  }
-  sort(event: Event): void {
-    handleSortEvent(event, this);
-    if (!this.appendMode) {
-      this.doSearch();
-    } else {
-      this.resetAndSearch();
-    }
-  }
-  search(event: Event): void {
-    if (event && !this.form) {
-      const f = (event.currentTarget as HTMLInputElement).form;
-      if (f) {
-        this.form = f;
-      }
-    }
-    this.resetAndSearch();
   }
 }

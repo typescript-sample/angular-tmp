@@ -1,4 +1,4 @@
-import { Filter, clone, isSuccessful, makeDiff } from "angularx";
+import { Filter, clone, getPageTotal, isSuccessful, makeDiff } from "angularx";
 import { Result } from "onecore";
 import { ErrorMessage, StringMap } from "uione";
 
@@ -32,6 +32,70 @@ export function afterSaved<T>(res: Result<T>, form: HTMLFormElement|undefined, r
     alertError(resource.error_conflict)
   }
 }
+export function format(...args: any[]): string {
+  let formatted = args[0]
+  if (!formatted || formatted === "") {
+    return ""
+  }
+  if (args.length > 1 && Array.isArray(args[1])) {
+    const params = args[1]
+    for (let i = 0; i < params.length; i++) {
+      const regexp = new RegExp("\\{" + i + "\\}", "gi")
+      formatted = formatted.replace(regexp, params[i])
+    }
+  } else {
+    for (let i = 1; i < args.length; i++) {
+      const regexp = new RegExp("\\{" + (i - 1) + "\\}", "gi")
+      formatted = formatted.replace(regexp, args[i])
+    }
+  }
+  return formatted
+}
+export function buildMessage<T>(resource: StringMap, pageIndex: number|undefined, pageSize: number, results: T[], total?: number): string {
+  if (!results || results.length === 0) {
+    return resource.msg_no_data_found;
+  } else {
+    if (!pageIndex) {
+      pageIndex = 1;
+    }
+    const fromIndex = (pageIndex - 1) * pageSize + 1;
+    const toIndex = fromIndex + results.length - 1;
+    const pageTotal = getPageTotal(pageSize, total);
+    if (pageTotal > 1) {
+      const msg2 = format(resource.msg_search_result_page_sequence, fromIndex, toIndex, total, pageIndex, pageTotal);
+      return msg2;
+    } else {
+      const msg3 = format(resource.msg_search_result_sequence, fromIndex, toIndex);
+      return msg3;
+    }
+  }
+}
+export function handleToggle(target?: HTMLInputElement, on?: boolean): boolean {
+  const off = !on
+  if (target) {
+    if (on) {
+      if (!target.classList.contains('on')) {
+        target.classList.add('on');
+      }
+    } else {
+      target.classList.remove('on');
+    }
+  }
+  return off
+}
+export function getPage(page?: number): number {
+  return page && page >= 1 ? page : 1
+}
+export function getOffset(limit: number, page?: number, firstLimit?: number): number {
+  const p = (page && page > 0 ? page : 1)
+  if (firstLimit && firstLimit > 0) {
+    const offset = limit * (p - 2) + firstLimit;
+    return offset < 0 ? 0 : offset;
+  } else {
+    const offset = limit * (p - 1);
+    return offset < 0 ? 0 : offset;
+  }
+}
 export function getNextPageToken<S extends Filter>(s: S, page?: number, nextPageToken?: string): string | number | undefined {
   const ft = clone(s);
   if (!page || page < 1) {
@@ -49,8 +113,8 @@ export function getNextPageToken<S extends Filter>(s: S, page?: number, nextPage
   const next = (nextPageToken && nextPageToken.length > 0 ? nextPageToken : offset);
   // const fields = ft.fields;
   delete ft['page'];
-  // delete ft['fields'];
-  // delete ft['limit'];
+  delete ft['fields'];
+  delete ft['limit'];
   delete ft['firstLimit'];
   return next;
 }

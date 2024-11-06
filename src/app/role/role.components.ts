@@ -7,8 +7,8 @@ import { Privilege, Role, RoleClient } from './service/role';
 import { registerEvents, showFormError, validateForm } from 'ui-plus';
 import { hideLoading, showLoading } from 'ui-loading';
 import { alertError, alertSuccess, alertWarning } from 'ui-alert';
-import { Result } from 'onecore';
-import { hasDiff } from '../core';
+import { Result, ValueText } from 'onecore';
+import { hasDiff, isEmptyObject } from '../core';
 
 interface ShownItem {
   action: number
@@ -54,35 +54,6 @@ function buildActionAll(actions: Map<string, number>, all: Privilege[]): void {
     }
   }
 }
-// function buildPrivileges(id: string, type: string, privileges: string[], all: Privilege[]): string[] {
-//   if (type === 'parent') {
-//     const parent = getPrivilege(id, all);
-//     if (parent && parent.children) {
-//       const ids = parent.children.map(i => i.id);
-//       const ms = privileges.filter(i => !ids.includes(i));
-//       if (containOne(privileges, parent.children)) {
-//         return ms;
-//       } else {
-//         return ms.concat(parent.children.map(i => i.id));
-//       }
-//     } else {
-//       return [];
-//     }
-//   } else {
-//     let checked = true;
-//     if (privileges && privileges.length > 0) {
-//       const m = privileges.find(item => item === id);
-//       checked = (m != null);
-//     } else {
-//       checked = false;
-//     }
-//     if (!checked) {
-//       return privileges.concat([id]);
-//     } else {
-//       return privileges.filter(item => item !== id);
-//     }
-//   }
-// }
 function buildShownModules(keyword: string, allPrivileges: Privilege[]): Privilege[] {
   if (!keyword || keyword === '') {
     return allPrivileges;
@@ -110,7 +81,7 @@ function buildPermissions(actions: Map<string, number>, privileges?: string[]): 
       permissions = 0
     }
     const id = p[0]
-    return { id: id, actions: actions.get(id) || 0, permissions: permissions || 0 } as any;
+    return { id: id, actions: actions.get(id) || 0, permissions: permissions || 0 };
   })
 }
 function getMax(map: Map<string, number>): number {
@@ -267,15 +238,13 @@ export class RoleComponent implements OnInit {
   shownPrivileges: Privilege[] = [];
   privileges: Permission[] = [];
   maxAction: number = 0;
-  statusList: any = [];
+  statusList: ValueText[] = [];
   disabled?: boolean;
 
   ngOnInit() {
     this.refForm = initElement(this.viewContainerRef, registerEvents);
     this.id = this.route.snapshot.params.id;
     this.newMode = !this.id;
-    // this.isReadOnly = !hasPermission(write, 1);
-    this.isReadOnly = false;
     Promise.all([
       this.masterDataService.getStatus(),
       this.roleService.getPrivileges()
@@ -317,34 +286,11 @@ export class RoleComponent implements OnInit {
     }).catch(handleError);
   }
 
-  onChangeKeyword(event: any) {
-    const keyword = event.target.value;
+  onChangeKeyword(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const keyword = target.value;
     const { allPrivileges } = this;
     this.shownPrivileges = buildShownModules(keyword, allPrivileges);
-  }
-
-  // checkedRole(module: Privilege, privilegesOfRoleId?: string[]) {
-  //   const parent = module.children && module.children.length > 0;
-  //   if (!privilegesOfRoleId) {
-  //     return false;
-  //   }
-  //   if (parent) {
-  //     return containOne(this.role.privileges, module.children);
-  //   }
-  //   return this.role.privileges ? (this.role.privileges.some(item => item === module.id)) : false;
-  // }
-  showModel(role: Role) {
-    this.role = role;
-    if (!role) {
-      return;
-    }
-    const { all } = this;
-    if (!role.privileges) {
-      role.privileges = [];
-    } else {
-      role.privileges = role.privileges.map(p => p.split(' ', 1)[0]);
-    }
-    this.checkedAll = role.privileges && all && role.privileges.length === all.length;
   }
 
   isParentChecked(id: string, child: Privilege[], privileges: Permission[]) {
@@ -363,10 +309,11 @@ export class RoleComponent implements OnInit {
     return checked.length === ids.length
   }
 
-  handleCheckParent(e: any, id: string) {
+  handleCheckParent(e: Event, id: string) {
     e.preventDefault()
     const { all, allPrivileges, actions } = this
-    const checked = e.target.checked
+    const target = e.target as HTMLInputElement
+    const checked = target.checked
     let mapPermissions = this.privileges
     const parentPrivilege = getPrivilege(id || "", allPrivileges)
     if (parentPrivilege !== undefined) {
@@ -401,20 +348,21 @@ export class RoleComponent implements OnInit {
     return Boolean(privilege?.permissions & action)
   }
 
-  handleCheckAll(privileges: string[]): void {
+  private handleCheckAll(privileges: string[]): void {
     const checkedAll = isCheckedAll(privileges, this.all)
     this.checkedAll = checkedAll;
     this.role.privileges = privileges;
   }
 
   handleCheckAllModule(
-    e: any,
+    e: Event,
     privileges: string[] | undefined,
     all: string[],
     actions: Map<String, number>,
   ) {
     e.preventDefault()
-    const checked = e.target.checked
+    const target = e.target as HTMLInputElement
+    const checked = target.checked
     if (!checked) {
       this.handleCheckAll([])
       this.privileges = buildPermissions(this.actions, this.role.privileges);
@@ -435,10 +383,11 @@ export class RoleComponent implements OnInit {
     this.privileges = buildPermissions(this.actions, this.role.privileges);
   }
 
-  handleCheckBox(event: any, id: string, parentId?: string, currentPrivilege?: Privilege, force?: boolean) {
+  handleCheckBox(event: Event, id: string, parentId?: string, currentPrivilege?: Privilege, force?: boolean) {
     event.preventDefault()
-    const uChecked: boolean = event.target.checked
-    let pChecked: number = +event.target.value
+    const target = event.target as HTMLInputElement
+    const uChecked: boolean = target.checked
+    let pChecked: number = +target.value
     const { actions, allPrivileges } = this
     let permissions = this.privileges
 
@@ -534,7 +483,6 @@ export class RoleComponent implements OnInit {
     const checkedAll = isCheckedAll(mapToSavePrivileges, this.all)
     this.checkedAll = checkedAll
     this.role.privileges = mapToSavePrivileges;
-    // setState({ ...state, checkedAll, role: { ...state.role, privileges: mapToSavePrivileges } })
   }
 
   getColumnsOfRow(action: number): ShownItem[] {
@@ -549,24 +497,11 @@ export class RoleComponent implements OnInit {
       return { shown: item === "1", action: cols[i] } as any;
     })
   }
-
-  protected getModelName(): string {
-    return 'role';
-  }
-
-  elements(form: any, childName: string[]): any {
-    const array = [];
-    for (const f of form) {
-      if (childName.includes(f.name)) {
-        array.push(f);
-      }
-    }
-    return array;
-  }
   assign(event: Event, id: string) {
     event.preventDefault();
     navigate(this.router, `/roles/assign`, [id]);
   };
+
   back() {
     if (!hasDiff(this.originRole, this.role)) {
       window.history.back()
@@ -574,12 +509,12 @@ export class RoleComponent implements OnInit {
       confirm(this.resource.msg_confirm_back, () => window.history.back())
     }
   }
-  validate(role: Role): boolean {
+  validate(): boolean {
     return validateForm(this.refForm, getLocale())
   }
   save(event: Event): void {
     event.preventDefault()
-    const valid = this.validate(this.role)
+    const valid = this.validate()
     if (valid) {
       confirm(this.resource.msg_confirm_save, () => {
         if (this.newMode) {
@@ -591,8 +526,7 @@ export class RoleComponent implements OnInit {
             .finally(hideLoading)
         } else {
           const diff = makeDiff(this.originRole, this.role, ["roleId"])
-          const l = Object.keys(diff as any).length
-          if (l === 0) {
+          if (isEmptyObject(diff)) {
             alertWarning(this.resource.msg_no_change)
           } else {
             showLoading()
