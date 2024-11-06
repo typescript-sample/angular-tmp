@@ -1,6 +1,6 @@
 ﻿import { Component, OnInit, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { addParametersIntoUrl, buildFromUrl, buildMessage, changePage, changePageSize, clone, getFields, getOffset, handleSortEvent, handleToggle, initElement, initFilter, mergeFilter, navigate, reset, showPaging} from 'angularx';
+import { addParametersIntoUrl, buildFromUrl, buildMessage, changePage, changePageSize, clone, getFields, getOffset, handleSortEvent, handleToggle, initElement, initFilter, mergeFilter, navigate, optimizeFilter, reset, showPaging} from 'angularx';
 import { Permission, StringMap, getStatusName, handleError, hasPermission, registerEvents, showMessage, storage, useResource } from 'uione';
 import { MasterDataClient } from './service/master-data';
 import { User, UserClient, UserFilter } from './service/user';
@@ -92,29 +92,15 @@ export class UsersComponent implements OnInit {
     reset(this);
     this.search();
   }
-  /*
-  getFilter(): UserFilter {
-    let obj = this.filter;
-    const obj3 = optimizeFilter(obj, this);
-    return obj3
-  }
-    */
   search(isFirstLoad?: boolean) {
     showLoading();
     debugger
-    this.filter.page = this.pageIndex;
-    addParametersIntoUrl(this.filter, isFirstLoad);
-    const offset = getOffset(this.pageSize, this.pageIndex);
-    // const s = this.getFilter();    
+    addParametersIntoUrl(this.filter, isFirstLoad, this.pageIndex);
     if (!this.fields) {
       this.fields = getFields(this.form);
     }
-    if (this.sortField && this.sortField.length > 0) {
-      this.filter.sort = (this.sortType === '-' ? '-' + this.sortField : this.sortField);
-    }
-    delete this.filter.page;
-    delete this.filter.limit;
-    delete this.filter.fields;
+    const offset = getOffset(this.pageSize, this.pageIndex);
+    optimizeFilter(this.filter, this)
     
     this.userService
       .search(this.filter, this.pageSize, offset, this.fields)
