@@ -120,7 +120,9 @@ export class UsersComponent implements OnInit {
         this.form = f;
       }
     }
-    this.resetAndSearch();
+    reset(this);
+    this.tmpPageIndex = 1;
+    this.search();
   }
   getFilter(): UserFilter {
     let obj = this.filter;
@@ -150,16 +152,13 @@ export class UsersComponent implements OnInit {
         hideLoading();
         if (this.triggerSearch) {
           this.triggerSearch = false;
-          this.resetAndSearch();
+          reset(this);
+          this.tmpPageIndex = 1;
+          this.search();
         }
       })
       .catch(handleError)
       .finally(hideLoading)
-  }
-  resetAndSearch() {
-    reset(this);
-    this.tmpPageIndex = 1;
-    this.search();
   }
 
   edit(userId: string) {
