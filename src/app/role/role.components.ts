@@ -8,6 +8,7 @@ import { registerEvents, showFormError, validateForm } from 'ui-plus';
 import { hideLoading, showLoading } from 'ui-loading';
 import { alertError, alertSuccess, alertWarning } from 'ui-alert';
 import { Result } from 'onecore';
+import { hasDiff } from '../core';
 
 interface ShownItem {
   action: number
@@ -245,16 +246,18 @@ export class RoleComponent implements OnInit {
     this.resource = useResource();
     this.role = createRole();
     this.originRole = createRole();
+    this.originRole = createRole();
+    this.isReadOnly = !hasPermission(write, 1)
   }
-
+  resource: StringMap;
   refForm?: HTMLFormElement;
   isReadOnly?: boolean;
   newMode?: boolean;
-
-  resource: StringMap;
   id?: string;
+
   originRole: Role;
-  role: Role = {} as any;
+  role: Role;
+
   checkedAll?: boolean;
   keyword: string = '';
 
@@ -313,6 +316,7 @@ export class RoleComponent implements OnInit {
       }
     }).catch(handleError);
   }
+
   onChangeKeyword(event: any) {
     const keyword = event.target.value;
     const { allPrivileges } = this;
@@ -563,8 +567,12 @@ export class RoleComponent implements OnInit {
     event.preventDefault();
     navigate(this.router, `/roles/assign`, [id]);
   };
-  back(event: Event) {
-    window.history.back();
+  back() {
+    if (!hasDiff(this.originRole, this.role)) {
+      window.history.back()
+    } else {
+      confirm(this.resource.msg_confirm_back, () => window.history.back())
+    }
   }
   validate(role: Role): boolean {
     return validateForm(this.refForm, getLocale())

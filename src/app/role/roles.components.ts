@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { buildFromUrl, initElement, navigate, Locale, mergeFilter, initFilter, addParametersIntoUrl, clone, SearchResult, formatResults, handleAppend, append, showPaging, buildMessage, reset, changePageSize, changePage, handleSortEvent, handleToggle, valueOfCheckbox, setValue, getModelName } from 'angularx';
-import { SearchParameter, StringMap, handleError, inputSearch, registerEvents, showMessage, storage, useLocale, useResource } from 'uione';
+import { SearchParameter, StringMap, handleError, hasPermission, inputSearch, registerEvents, showMessage, storage, useLocale, useResource, write } from 'uione';
 import { MasterDataClient } from './service/master-data';
 import { Role, RoleClient, RoleFilter } from './service/role';
 import { hideLoading, showLoading } from 'ui-loading';
@@ -15,13 +15,14 @@ export class RolesComponent implements OnInit {
   constructor(protected viewContainerRef: ViewContainerRef, protected router: Router, private roleService: RoleClient, private masterDataService: MasterDataClient) {
     this.searchParam = inputSearch();
     this.resource = useResource();
+    this.canWrite = hasPermission(write)
   }
   searchParam: SearchParameter;
   resource: StringMap;
   form?: HTMLFormElement;
+  canWrite: boolean;
   running?: boolean;
   status: any = [];
-  addable: boolean = true;
   locale?: Locale;
 
   excluding?: string[] | number[];

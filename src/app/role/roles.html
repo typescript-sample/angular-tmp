@@ -6,7 +6,7 @@
         (click)="changeView('table')"></button>
       <button *ngIf="view === 'table'" type='button' id='btnListView' name='btnListView' class='btn-list-view'
         (click)="changeView('listview')"></button>
-      <button *ngIf="addable" type='button' class='btn-new' id='btnNew' (click)='addRole()'></button>
+      <button *ngIf="canWrite" type='button' class='btn-new' id='btnNew' (click)='addRole()'></button>
     </div>
   </header>
   <div>

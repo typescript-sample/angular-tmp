@@ -29,14 +29,15 @@ export class UserComponent implements OnInit {
     this.originUser = createUser();
     this.isReadOnly = !hasPermission(write, 1)
   }
+  resource: StringMap;
   refForm?: HTMLFormElement;
   isReadOnly?: boolean;
   newMode?: boolean;
-
-  resource: StringMap;
   id?: string;
+
   originUser: User;
   user: User;
+
   titles: Item[] = [];
   positions: Item[] = [];
 
@@ -98,7 +99,11 @@ export class UserComponent implements OnInit {
     }
   }
   back() {
-    goBack(confirm, this.resource, this.originUser, this.user)
+    if (!hasDiff(this.originUser, this.user)) {
+      window.history.back()
+    } else {
+      confirm(this.resource.msg_confirm_back, () => window.history.back())
+    }
   }
   validate(user: User): boolean {
     return validateForm(this.refForm, useLocale())
@@ -112,7 +117,7 @@ export class UserComponent implements OnInit {
           showLoading();
           this.service
             .create(this.user)
-            .then((res) => afterSaved(res, this.refForm, this.resource, showFormError, alertSuccess, alertError))
+            .then((res) => this.afterSaved(res))
             .catch(handleError)
             .finally(hideLoading)
         } else {
@@ -124,12 +129,23 @@ export class UserComponent implements OnInit {
             showLoading()
             this.service
               .update(this.user)
-              .then((res) => afterSaved(res, this.refForm, this.resource, showFormError, alertSuccess, alertError))
+              .then((res) => this.afterSaved(res))
               .catch(handleError)
               .finally(hideLoading)
           }
         }
       })
+    }
+  }
+  afterSaved(res: Result<User>): void {
+    if (Array.isArray(res)) {
+      showFormError(this.refForm, res)
+    } else if (isSuccessful(res)) {
+      alertSuccess(this.resource.msg_save_success, () => window.history.back())
+    } else if (res === 0) {
+      alertError(this.resource.error_not_found)
+    } else {
+      alertError(this.resource.error_conflict)
     }
   }
 }

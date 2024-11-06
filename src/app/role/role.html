@@ -1,7 +1,7 @@
 <div class='view-container'>
   <form id='roleForm' model-name='role' name='roleForm' novalidate>
     <header>
-      <button type='button' id='btnBack' name='btnBack' class='btn-back' (click)='back($event)'></button>
+      <button type='button' id='btnBack' name='btnBack' class='btn-back' (click)='back()'></button>
       <h2>{{newMode ? resource.create : resource.edit}} {{resource.role}} </h2>
       <button class="btn-group btn-right"><i (click)="assign($event, role.roleId)"
           class="material-icons">group</i></button>
