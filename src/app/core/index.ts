@@ -1,4 +1,4 @@
-import { Filter, clone, getPageTotal, isSuccessful, makeDiff } from "angularx";
+import { Filter, Pagination, Sortable, clone, getPageTotal, isSuccessful, makeDiff } from "angularx";
 import { Result } from "onecore";
 import { ErrorMessage, StringMap } from "uione";
 
@@ -83,9 +83,6 @@ export function handleToggle(target?: HTMLInputElement, on?: boolean): boolean {
   }
   return off
 }
-export function getPage(page?: number): number {
-  return page && page >= 1 ? page : 1
-}
 export function getOffset(limit: number, page?: number, firstLimit?: number): number {
   const p = (page && page > 0 ? page : 1)
   if (firstLimit && firstLimit > 0) {
@@ -96,6 +93,31 @@ export function getOffset(limit: number, page?: number, firstLimit?: number): nu
     return offset < 0 ? 0 : offset;
   }
 }
+interface Searchable extends Pagination, Sortable {
+}
+
+export function optimizeFilter<S extends Filter>(obj: S, searchable: Searchable, fields?: string[]): S {
+  debugger
+  obj.fields = fields;
+  if (searchable.pageIndex && searchable.pageIndex > 1) {
+    obj.page = searchable.pageIndex;
+  } else {
+    delete obj.page;
+  }
+  obj.limit = searchable.pageSize;
+  if (searchable.appendMode && searchable.initPageSize !== searchable.pageSize) {
+    obj.firstLimit = searchable.initPageSize;
+  } else {
+    delete obj.firstLimit;
+  }
+  if (searchable.sortField && searchable.sortField.length > 0) {
+    obj.sort = (searchable.sortType === '-' ? '-' + searchable.sortField : searchable.sortField);
+  } else {
+    delete obj.sort;
+  }
+  return obj;
+}
+
 export function getNextPageToken<S extends Filter>(s: S, page?: number, nextPageToken?: string): string | number | undefined {
   const ft = clone(s);
   if (!page || page < 1) {

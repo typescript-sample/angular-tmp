@@ -1,11 +1,11 @@
 ﻿import { Component, OnInit, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { Locale, addParametersIntoUrl, buildFromUrl, changePage, changePageSize, clone, handleSortEvent, initElement, initFilter, mergeFilter, navigate, optimizeFilter, reset, showPaging} from 'angularx';
+import { Locale, addParametersIntoUrl, buildFromUrl, changePage, changePageSize, clone, handleSortEvent, initElement, initFilter, mergeFilter, navigate, reset, showPaging} from 'angularx';
 import { Permission, StringMap, getStatusName, handleError, hasPermission, registerEvents, showMessage, storage, useResource } from 'uione';
 import { MasterDataClient } from './service/master-data';
 import { User, UserClient, UserFilter } from './service/user';
 import { hideLoading, showLoading } from 'ui-loading';
-import { buildMessage, getNextPageToken, getOffset, getPage, handleToggle } from '../core';
+import { buildMessage, getOffset, handleToggle, optimizeFilter } from '../core';
 import { ValueText } from 'onecore';
 
 interface StatusList {
@@ -102,20 +102,26 @@ export class UsersComponent implements OnInit {
   }
   search(isFirstLoad?: boolean) {
     showLoading();
-    if (!this.ignoreUrlParam) {
-      addParametersIntoUrl(this.filter, isFirstLoad);
-    }
-    const s = this.getFilter();
+    this.filter.page = this.pageIndex
+    addParametersIntoUrl(this.filter, isFirstLoad);
     const offset = getOffset(this.pageSize, this.pageIndex);
+    const fields = this.filter.fields
+    // const s = this.getFilter();    
+    if (this.sortField && this.sortField.length > 0) {
+      this.filter.sort = (this.sortType === '-' ? '-' + this.sortField : this.sortField);
+    }
+    delete this.filter.page;
+    delete this.filter.limit;
+    delete this.filter.fields;
     this.userService
-      .search(this.filter, this.filter.limit, offset, this.filter.fields)
+      .search(this.filter, this.pageSize, offset, fields)
       .then((res) => {
         if (res.total) {
           this.itemTotal = res.total;
         }
         this.list = res.list;
         showPaging(this, res.list, this.pageSize, res.total);
-        showMessage(buildMessage(this.resource, s.page, this.pageSize, res.list, res.total));
+        showMessage(buildMessage(this.resource, this.pageIndex, this.pageSize, res.list, res.total));
       })
       .catch(handleError)
       .finally(hideLoading)
