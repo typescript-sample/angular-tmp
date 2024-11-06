@@ -1,11 +1,11 @@
 ﻿import { Component, OnInit, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { Locale, SearchComponent, SearchResult, addParametersIntoUrl, append, buildFromUrl, buildMessage, changePage, changePageSize, clone, formatResults, getModelName, handleAppend, handleSortEvent, handleToggle, initElement, initFilter, mergeFilter, navigate, optimizeFilter, reset, setValue, showPaging, valueOfCheckbox } from 'angularx';
-import { Permission, SearchParameter, StringMap, getStatusName, handleError, hasPermission, inputSearch, registerEvents, showMessage, storage, useLocale, useResource } from 'uione';
+import { Locale, addParametersIntoUrl, buildFromUrl, changePage, changePageSize, clone, handleSortEvent, initElement, initFilter, mergeFilter, navigate, optimizeFilter, reset, showPaging} from 'angularx';
+import { Permission, StringMap, getStatusName, handleError, hasPermission, registerEvents, showMessage, storage, useResource } from 'uione';
 import { MasterDataClient } from './service/master-data';
 import { User, UserClient, UserFilter } from './service/user';
 import { hideLoading, showLoading } from 'ui-loading';
-import { getNextPageToken } from '../core';
+import { buildMessage, getNextPageToken, getPage, handleToggle } from '../core';
 import { ValueText } from 'onecore';
 
 interface StatusList {
@@ -30,11 +30,9 @@ function initStatusList(values: ValueText[]): StatusList[] {
 })
 export class UsersComponent implements OnInit {
   constructor(private viewContainerRef: ViewContainerRef, protected router: Router, private userService: UserClient, protected masterDataService: MasterDataClient) {
-    this.searchParam = inputSearch();
     this.resource = useResource();
     this.canWrite = hasPermission(Permission.write)
   }
-  searchParam: SearchParameter;
   resource: StringMap;
   form?: HTMLFormElement;
   statusList: any[] = [];
@@ -54,24 +52,17 @@ export class UsersComponent implements OnInit {
   pageSizes: number[] = [10, 20, 40, 60, 100, 200, 400, 1000];
 
   view?: string;
-  nextPageToken?: string;
-  initPageSize = 20;
   pageSize = 20;
   pageIndex = 1;
   itemTotal: number = 0;
   pageTotal?: number;
   showPaging?: boolean;
-  append?: boolean;
-  appendMode?: boolean;
-  appendable?: boolean;
 
   // Sortable
   sortField?: string;
   sortType?: string;
   sortTarget?: HTMLElement;
 
-  format?: (obj: User, locale?: Locale) => User;
-  sequenceNo = 'sequenceNo';
   triggerSearch?: boolean;
   tmpPageIndex?: number;
 
@@ -120,11 +111,7 @@ export class UsersComponent implements OnInit {
   }
   sort(event: Event): void {
     handleSortEvent(event, this);
-    if (!this.appendMode) {
-      this.search();
-    } else {
-      this.resetAndSearch();
-    }
+    this.search();
   }
   searchOnClick(event: Event): void {
     if (event && !this.form) {
@@ -150,7 +137,7 @@ export class UsersComponent implements OnInit {
     this.userService
       .search(this.filter, this.filter.limit, next, this.filter.fields)
       .then((res) => {
-        this.pageIndex = (s.page && s.page >= 1 ? s.page : 1);
+        this.pageIndex = getPage(s.page)
         if (res.total) {
           this.itemTotal = res.total;
         }
@@ -158,7 +145,7 @@ export class UsersComponent implements OnInit {
         this.list = res.list;
         this.tmpPageIndex = s.page;
         if (s.limit) {
-          showMessage(buildMessage(this.searchParam.resource, s.page, s.limit, res.list, res.total));
+          showMessage(buildMessage(this.resource, s.page, s.limit, res.list, res.total));
         }
         hideLoading();
         if (this.triggerSearch) {
@@ -185,9 +172,7 @@ export class UsersComponent implements OnInit {
     this.view = v;
   }
   toggleFilter(event: any): void {
-    const x = !this.hideFilter;
-    handleToggle(event.target as HTMLInputElement, !x)
-    this.hideFilter = x;
+    this.hideFilter = handleToggle(event.target as HTMLInputElement, this.hideFilter)
   }
   clearQ = () => {
     this.filter.q = '';
