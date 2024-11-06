@@ -5,7 +5,7 @@ import { Permission, StringMap, getStatusName, handleError, hasPermission, regis
 import { MasterDataClient } from './service/master-data';
 import { User, UserClient, UserFilter } from './service/user';
 import { hideLoading, showLoading } from 'ui-loading';
-import { buildMessage, getNextPageToken, getPage, handleToggle } from '../core';
+import { buildMessage, getNextPageToken, getOffset, getPage, handleToggle } from '../core';
 import { ValueText } from 'onecore';
 
 interface StatusList {
@@ -43,10 +43,7 @@ export class UsersComponent implements OnInit {
   hideFilter?: boolean;
   ignoreUrlParam?: boolean;
   filter: UserFilter = {} as any;
-  list?: User[];
-  locale?: Locale;
-  loadTime?: Date;
-  loadPage = 1;
+  list: User[] = [];
 
   pageMaxSize = 7;
   pageSizes: number[] = [10, 20, 40, 60, 100, 200, 400, 1000];
@@ -63,9 +60,6 @@ export class UsersComponent implements OnInit {
   sortType?: string;
   sortTarget?: HTMLElement;
 
-  triggerSearch?: boolean;
-  tmpPageIndex?: number;
-
   ngOnInit() {
     this.hideFilter = true;
     this.form = initElement(this.viewContainerRef, registerEvents);
@@ -75,8 +69,6 @@ export class UsersComponent implements OnInit {
     ]).then(values => {
       const [status] = values;
       this.statusList = initStatusList(status);
-      this.loadTime = new Date();
-      this.loadPage = this.pageIndex;
       const obj2 = initFilter(s, this);
       this.filter = obj2;
       if (storage.autoSearch) {
@@ -86,42 +78,21 @@ export class UsersComponent implements OnInit {
       }
     }).catch(handleError);
   }
-  
-  onPageSizeChanged(event: Event): void {
-    const ctrl = event.currentTarget as HTMLInputElement;
-    changePageSize(this, Number(ctrl.value));
-    this.tmpPageIndex = 1;
-    this.search();
-  }
-  onPageChanged(event?: any): void {
-    if (this.loadTime) {
-      const now = new Date();
-      const d = Math.abs(this.loadTime.getTime() - now.getTime());
-      if (d < 610) {
-        if (event) {
-          if (event.page && event.itemsPerPage && event.page !== this.loadPage) {
-            changePage(this, this.loadPage, event.itemsPerPage);
-          }
-        }
-        return;
-      }
-    }
-    changePage(this, event.page, event.itemsPerPage);
-    this.search();
-  }
   sort(event: Event): void {
     handleSortEvent(event, this);
     this.search();
   }
+  onPageSizeChanged(event: Event): void {
+    const ele = event.currentTarget as HTMLInputElement;
+    changePageSize(this, Number(ele.value));
+    this.search();
+  }
+  onPageChanged(event?: any): void {
+    changePage(this, event.page, event.itemsPerPage);
+    this.search();
+  }
   searchOnClick(event: Event): void {
-    if (event && !this.form) {
-      const f = (event.currentTarget as HTMLInputElement).form;
-      if (f) {
-        this.form = f;
-      }
-    }
     reset(this);
-    this.tmpPageIndex = 1;
     this.search();
   }
   getFilter(): UserFilter {
@@ -135,27 +106,16 @@ export class UsersComponent implements OnInit {
       addParametersIntoUrl(this.filter, isFirstLoad);
     }
     const s = this.getFilter();
-    const next = getNextPageToken(this.filter);
+    const offset = getOffset(this.pageSize, this.pageIndex);
     this.userService
-      .search(this.filter, this.filter.limit, next, this.filter.fields)
+      .search(this.filter, this.filter.limit, offset, this.filter.fields)
       .then((res) => {
-        this.pageIndex = getPage(s.page)
         if (res.total) {
           this.itemTotal = res.total;
         }
-        showPaging(this, res.list, s.limit, res.total);
         this.list = res.list;
-        this.tmpPageIndex = s.page;
-        if (s.limit) {
-          showMessage(buildMessage(this.resource, s.page, s.limit, res.list, res.total));
-        }
-        hideLoading();
-        if (this.triggerSearch) {
-          this.triggerSearch = false;
-          reset(this);
-          this.tmpPageIndex = 1;
-          this.search();
-        }
+        showPaging(this, res.list, this.pageSize, res.total);
+        showMessage(buildMessage(this.resource, s.page, this.pageSize, res.list, res.total));
       })
       .catch(handleError)
       .finally(hideLoading)
