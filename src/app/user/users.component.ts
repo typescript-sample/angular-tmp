@@ -90,7 +90,7 @@ export class UsersComponent implements OnInit {
       this.filter = obj2;
       if (storage.autoSearch) {
         setTimeout(() => {
-          this.doSearch(true);
+          this.search(true);
         }, 0);
       }
     }).catch(handleError);
@@ -100,7 +100,7 @@ export class UsersComponent implements OnInit {
     const ctrl = event.currentTarget as HTMLInputElement;
     changePageSize(this, Number(ctrl.value));
     this.tmpPageIndex = 1;
-    this.doSearch();
+    this.search();
   }
   onPageChanged(event?: any): void {
     if (this.loadTime) {
@@ -116,17 +116,17 @@ export class UsersComponent implements OnInit {
       }
     }
     changePage(this, event.page, event.itemsPerPage);
-    this.doSearch();
+    this.search();
   }
   sort(event: Event): void {
     handleSortEvent(event, this);
     if (!this.appendMode) {
-      this.doSearch();
+      this.search();
     } else {
       this.resetAndSearch();
     }
   }
-  search(event: Event): void {
+  searchOnClick(event: Event): void {
     if (event && !this.form) {
       const f = (event.currentTarget as HTMLInputElement).form;
       if (f) {
@@ -140,7 +140,7 @@ export class UsersComponent implements OnInit {
     const obj3 = optimizeFilter(obj, this);
     return obj3
   }
-  doSearch(isFirstLoad?: boolean) {
+  search(isFirstLoad?: boolean) {
     showLoading();
     if (!this.ignoreUrlParam) {
       addParametersIntoUrl(this.filter, isFirstLoad);
@@ -150,34 +150,31 @@ export class UsersComponent implements OnInit {
     this.userService
       .search(this.filter, this.filter.limit, next, this.filter.fields)
       .then((res) => {
-        this.showResults(s, res);
+        this.pageIndex = (s.page && s.page >= 1 ? s.page : 1);
+        if (res.total) {
+          this.itemTotal = res.total;
+        }
+        showPaging(this, res.list, s.limit, res.total);
+        this.list = res.list;
+        this.tmpPageIndex = s.page;
+        if (s.limit) {
+          showMessage(buildMessage(this.searchParam.resource, s.page, s.limit, res.list, res.total));
+        }
+        hideLoading();
+        if (this.triggerSearch) {
+          this.triggerSearch = false;
+          this.resetAndSearch();
+        }
       })
       .catch(handleError)
       .finally(hideLoading)
   }
-  showResults(s: UserFilter, sr: SearchResult<User>): void {
-    const results = sr.list;
-    this.pageIndex = (s.page && s.page >= 1 ? s.page : 1);
-    if (sr.total) {
-      this.itemTotal = sr.total;
-    }
-    showPaging(this, sr.list, s.limit, sr.total);
-    this.list = results;
-    this.tmpPageIndex = s.page;
-    if (s.limit) {
-      showMessage(buildMessage(this.searchParam.resource, s.page, s.limit, sr.list, sr.total));
-    }
-    hideLoading();
-    if (this.triggerSearch) {
-      this.triggerSearch = false;
-      this.resetAndSearch();
-    }
-  }
   resetAndSearch() {
     reset(this);
     this.tmpPageIndex = 1;
-    this.doSearch();
+    this.search();
   }
+
   edit(userId: string) {
     navigate(this.router, 'users', [userId]);
   }

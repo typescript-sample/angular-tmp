@@ -20,7 +20,7 @@
             placeholder='{{resource.keyword}}' />
           <button type='button' [hidden]="!filter.q" class='btn-remove-text' (click)="clearQ()"></button>
           <button type='button' class='btn-filter' (click)="toggleFilter($event)"></button>
-          <button type='submit' class='btn-search' (click)='search($event)'></button>
+          <button type='submit' class='btn-search' (click)='searchOnClick($event)'></button>
         </label>
         <pagination class='col s12 m8' id='pageIndex' name='pageIndex' *ngIf='showPaging' [(ngModel)]='pageIndex'
           (pageChanged)='onPageChanged($event)' [directionLinks]='false' [totalItems]='itemTotal'
