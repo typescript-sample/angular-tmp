@@ -4,7 +4,7 @@ import { resources } from 'angularx';
 import * as csv from 'csvtojson';
 import { currency, locale } from 'locale-service';
 import { phonecodes } from 'phonecodes';
-import { alertError, confirm } from 'ui-alert';
+import { alertError, confirm, resources as uiplusResources } from 'ui-alert';
 import { loading } from 'ui-loading';
 import { UIService, formatFax, formatNumber, formatPhone, resources as uiresources } from 'ui-plus';
 import { toast } from 'ui-toast';
@@ -46,6 +46,14 @@ export class AppComponent implements OnInit {
       window.location.href = location.origin + '/connect/oauth2' + location.search;
     }
 */
+    const res = storage.getResource()
+    uiplusResources.confirmHeader = res.confirm
+    uiplusResources.leftText = res.no
+    uiplusResources.rightText = res.yes
+    uiplusResources.errorHeader = res.error
+    uiplusResources.warningHeader = res.warning
+    uiplusResources.infoHeader = res.info
+    uiplusResources.successHeader = res.success
     this.router.events.subscribe((evt) => {
       if (!(evt instanceof NavigationEnd)) {
         return;

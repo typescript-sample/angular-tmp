@@ -1,14 +1,15 @@
 ﻿import { Component, OnInit, ViewContainerRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { StringMap, clone, createModel, initElement, isSuccessful, makeDiff } from 'angularx';
+import { StringMap, clone, createModel, initElement, isSuccessful, makeDiff, setReadOnly } from 'angularx';
 import { emailOnBlur, formatter, numberOnFocus, phoneOnBlur, registerEvents, requiredOnBlur, showFormError, validateForm } from 'ui-plus';
-import { Status, handleError, useLocale, useResource } from 'uione';
+import { Privilege, Status, getPath, getPrivilege, handleError, hasPermission, storage, useLocale, useResource, write } from 'uione';
 import { Gender } from 'uione';
 import { MasterDataClient } from './service/master-data';
 import { User, UserClient } from './service/user';
 import { Item, Result } from 'onecore';
 import { hideLoading, showLoading } from 'ui-loading';
 import { alertError, alertSuccess, alertWarning, confirm } from 'ui-alert';
+import { goBack, hasDiff } from '../core';
 
 function createUser(): User {
   const user = createModel<User>();
@@ -26,6 +27,7 @@ export class UserComponent implements OnInit {
     this.resource = useResource();
     this.user = createUser();
     this.originUser = createUser();
+    this.isReadOnly = !hasPermission(write, 1)
   }
   refForm?: HTMLFormElement;
   isReadOnly?: boolean;
@@ -57,11 +59,14 @@ export class UserComponent implements OnInit {
         this.userService
           .load(this.id)
           .then((user) => {
-            if (!user) {
-              alertError(this.resource.error_404, () => window.history.back())
-            } else {
+            if (user) {
               this.originUser = clone(user);
               this.user = user;
+              if (this.isReadOnly) {
+                setReadOnly(this.refForm)
+              }
+            } else {
+              alertError(this.resource.error_404, () => window.history.back())
             }
           })
           .catch(handleError)
@@ -92,8 +97,8 @@ export class UserComponent implements OnInit {
       this.user = { ...user, gender: Gender.Female };
     }
   }
-  back(event: Event) {
-    window.history.back();
+  back() {
+    goBack(confirm, this.resource, this.originUser, this.user)
   }
   validate(user: User): boolean {
     return validateForm(this.refForm, useLocale())

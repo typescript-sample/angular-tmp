@@ -1,7 +1,7 @@
 ﻿<div class='view-container'>
   <form id='userForm' name='userForm' novalidate>
     <header>
-      <button type='button' class='btn-back' (click)='back($event)'></button>
+      <button type='button' class='btn-back' (click)='back()'></button>
       <h2>{{resource.user}}</h2>
     </header>
     <div class='row'>
@@ -70,7 +70,7 @@
       </div>
     </div>
     <footer>
-      <button type='submit' id='btnSave' name='btnSave' (click)='save($event)'>{{resource.save}}</button>
+      <button type='submit' id='btnSave' [disabled]='isReadOnly' name='btnSave' (click)='save($event)'>{{resource.save}}</button>
     </footer>
   </form>
 </div>

@@ -1,5 +1,37 @@
-import { Filter, Pagination, append, clone, handleAppend, showPaging } from "angularx";
+import { Filter, clone, isSuccessful, makeDiff } from "angularx";
+import { Result } from "onecore";
+import { ErrorMessage, StringMap } from "uione";
 
+export function isEmptyObject(obj: any): boolean {
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      return false;
+    }
+  }
+  return true;
+};
+export function hasDiff<T>(o1: T, o2: T, keys?: string[], version?: string): boolean {
+  const diff = makeDiff(o1, o2, keys, version)
+  return !isEmptyObject(diff)
+}
+export function goBack<T>(confirm: (msg: string, yesCallback?: () => void) => void, resource: StringMap, o1: T, o2: T, keys?: string[], version?: string) {
+  if (!hasDiff(o1, o2, keys, version)) {
+    window.history.back()
+  } else {
+    confirm(resource.msg_confirm_back, () => window.history.back())
+  }
+}
+export function afterSaved<T>(res: Result<T>, form: HTMLFormElement|undefined, resource: StringMap, showFormError: (form?: HTMLFormElement, errors?: ErrorMessage[]) => ErrorMessage[], alertSuccess: (msg: string, callback?: () => void) => void, alertError :(msg: string) => void) {
+  if (Array.isArray(res)) {
+    showFormError(form, res)
+  } else if (isSuccessful(res)) {
+    alertSuccess(resource.msg_save_success, () => window.history.back())
+  } else if (res === 0) {
+    alertError(resource.error_not_found)
+  } else {
+    alertError(resource.error_conflict)
+  }
+}
 export function getNextPageToken<S extends Filter>(s: S, page?: number, nextPageToken?: string): string | number | undefined {
   const ft = clone(s);
   if (!page || page < 1) {

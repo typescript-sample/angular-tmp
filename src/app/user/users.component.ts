@@ -1,7 +1,7 @@
 ﻿import { Component, OnInit, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { Locale, SearchComponent, SearchResult, addParametersIntoUrl, append, buildFromUrl, buildMessage, changePage, changePageSize, clone, formatResults, getModelName, handleAppend, handleSortEvent, handleToggle, initElement, initFilter, mergeFilter, navigate, reset, setValue, showPaging, valueOfCheckbox } from 'angularx';
-import { SearchParameter, StringMap, getStatusName, handleError, inputSearch, registerEvents, showMessage, storage, useLocale, useResource } from 'uione';
+import { Permission, SearchParameter, StringMap, getStatusName, handleError, hasPermission, inputSearch, registerEvents, showMessage, storage, useLocale, useResource } from 'uione';
 import { MasterDataClient } from './service/master-data';
 import { User, UserClient, UserFilter } from './service/user';
 import { hideLoading, showLoading } from 'ui-loading';
@@ -32,16 +32,15 @@ export class UsersComponent implements OnInit {
   constructor(private viewContainerRef: ViewContainerRef, protected router: Router, private userService: UserClient, protected masterDataService: MasterDataClient) {
     this.searchParam = inputSearch();
     this.resource = useResource();
+    this.canWrite = hasPermission(Permission.write)
   }
   searchParam: SearchParameter;
   resource: StringMap;
   form?: HTMLFormElement;
-  addable: boolean = true;
   statusList: any[] = [];
   femaleIcon = "app/assets/images/female.png";
   maleIcon = "app/assets/images/female.png";
-  viewable: boolean = true;
-  editable: boolean = true;
+  canWrite: boolean;
 
   hideFilter?: boolean;
   ignoreUrlParam?: boolean;

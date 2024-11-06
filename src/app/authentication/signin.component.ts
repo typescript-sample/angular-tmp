@@ -62,7 +62,6 @@ export class SigninComponent extends MessageComponent implements OnInit {
     navigate(this.router, storage.home);
   }
   async signin(event?: any) {
-
     const r = storage.resource();
     this.user.username = this.user.username.trim();
     if (!validate(this.user, r, this.showError)) {
@@ -71,7 +70,6 @@ export class SigninComponent extends MessageComponent implements OnInit {
       this.hideMessage();
     }
     try {
-
       storage.loading().showLoading();
       const result = await this.authenticationService.authenticate(this.user);
       const s = result.status;

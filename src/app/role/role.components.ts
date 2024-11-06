@@ -36,17 +36,7 @@ function getPrivilege(id: string, all: Privilege[]): Privilege | undefined {
   }
   return undefined;
 }
-function containOne(privileges?: string[], all?: Privilege[]): boolean {
-  if (!privileges || privileges.length === 0 || !all || all.length === 0) {
-    return false;
-  }
-  for (const m of all) {
-    if (privileges.includes(m.id)) {
-      return true;
-    }
-  }
-  return false;
-}
+
 function buildAll(privileges: string[], all: Privilege[]): void {
   for (const root of all) {
     privileges.push(root.id);
@@ -238,31 +228,11 @@ function padLeft(str: string, num: number) {
   return str.padStart(num, "0")
 }
 
-const handleCheckAllModule = (
-  e: any,
-  privileges: string[] | undefined,
-  all: string[],
-  actions: Map<String, number>,
-  callback: (privileges: string[]) => void,
-) => {
-  e.preventDefault()
-  const checked = e.target.checked
-  if (!checked) {
-    callback([])
-    return
-  }
-
-  if (!privileges) {
-    privileges = []
-  }
-  if (checked) {
-    privileges = []
-    for (const m of all) {
-      privileges.push(m + " " + actions.get(m))
-    }
-  }
-
-  callback(privileges || [])
+function createRole(): Role {
+  const role = {} as any;
+  role.privileges = [];
+  role.status = Status.Active;
+  return role;
 }
 
 @Component({
@@ -272,8 +242,9 @@ const handleCheckAllModule = (
 })
 export class RoleComponent implements OnInit {
   constructor(private viewContainerRef: ViewContainerRef, private route: ActivatedRoute, private roleService: RoleClient, private masterDataService: MasterDataClient, protected router: Router) {
-    this.role = this.createModel();
     this.resource = useResource();
+    this.role = createRole();
+    this.originRole = createRole();
   }
 
   refForm?: HTMLFormElement;
@@ -282,7 +253,7 @@ export class RoleComponent implements OnInit {
 
   resource: StringMap;
   id?: string;
-  originRole: Role = {} as any;
+  originRole: Role;
   role: Role = {} as any;
   checkedAll?: boolean;
   keyword: string = '';
@@ -310,7 +281,7 @@ export class RoleComponent implements OnInit {
       buildAll(this.all, allPrivileges);
       buildActionAll(this.actions, allPrivileges)
       if (!this.id) {
-        const role = this.createModel();
+        const role = createRole();
         this.originRole = clone(role);
         this.role = role;
         this.statusList = status;
@@ -342,20 +313,11 @@ export class RoleComponent implements OnInit {
       }
     }).catch(handleError);
   }
-
-  createModel(): Role {
-    const role = {} as any;
-    role.privileges = [];
-    role.status = Status.Active;
-    return role;
-  }
-
   onChangeKeyword(event: any) {
     const keyword = event.target.value;
     const { allPrivileges } = this;
     this.shownPrivileges = buildShownModules(keyword, allPrivileges);
   }
-
 
   // checkedRole(module: Privilege, privilegesOfRoleId?: string[]) {
   //   const parent = module.children && module.children.length > 0;
@@ -378,11 +340,7 @@ export class RoleComponent implements OnInit {
     } else {
       role.privileges = role.privileges.map(p => p.split(' ', 1)[0]);
     }
-    this.setCheckedAll(role.privileges, all);
-  }
-
-  setCheckedAll(privileges: string[], all: string[]) {
-    this.checkedAll = privileges && all && privileges.length === all.length;
+    this.checkedAll = role.privileges && all && role.privileges.length === all.length;
   }
 
   isParentChecked(id: string, child: Privilege[], privileges: Permission[]) {
