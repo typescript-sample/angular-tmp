@@ -1,11 +1,12 @@
 ﻿import { Component, OnInit, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { addParametersIntoUrl, buildFromUrl, buildMessage, changePage, changePageSize, clone, getFields, getOffset, handleSortEvent, handleToggle, initElement, initFilter, mergeFilter, navigate, optimizeFilter, reset, showPaging} from 'angularx';
-import { Permission, StringMap, getStatusName, handleError, hasPermission, registerEvents, showMessage, storage, useResource } from 'uione';
+import { addParametersIntoUrl, buildFromUrl, buildMessage, changePage, changePageSize, clone, getFields, getNumber, getOffset, handleSortEvent, handleToggle, initElement, initFilter, mergeFilter, optimizeFilter, Pagination, reset, showPaging, Sortable} from 'angularx';
+import { Permission, StringMap, getStatusName, handleError, hasPermission, showMessage, useResource } from 'uione';
 import { MasterDataClient } from './service/master-data';
 import { User, UserClient, UserFilter } from './service/user';
 import { hideLoading, showLoading } from 'ui-loading';
 import { ValueText } from 'onecore';
+import { registerEvents } from 'ui-plus';
 
 interface StatusList {
   value: string,
@@ -22,24 +23,23 @@ function initStatusList(values: ValueText[]): StatusList[] {
   })
   return sl
 }
+
 @Component({
   selector: 'app-user-list',
   templateUrl: './users.html',
   providers: [UserClient]
 })
-export class UsersComponent implements OnInit {
-  constructor(private viewContainerRef: ViewContainerRef, protected router: Router, private userService: UserClient, protected masterDataService: MasterDataClient) {
+export class UsersComponent implements OnInit, Sortable, Pagination {
+  constructor(private viewContainerRef: ViewContainerRef, private router: Router, private service: UserClient, private masterDataService: MasterDataClient) {
     this.resource = useResource();
     this.canWrite = hasPermission(Permission.write)
   }
   resource: StringMap;
   form?: HTMLFormElement;
   statusList: any[] = [];
-  femaleIcon = "app/assets/images/female.png";
-  maleIcon = "app/assets/images/female.png";
   canWrite: boolean;
+  hideFilter = true;
 
-  hideFilter?: boolean;
   filter: UserFilter = {} as any;
   list: User[] = [];
   fields?: string[];
@@ -50,7 +50,7 @@ export class UsersComponent implements OnInit {
   view?: string;
   pageSize = 20;
   pageIndex = 1;
-  itemTotal: number = 0;
+  itemTotal = 0;
   pageTotal?: number;
   showPaging?: boolean;
 
@@ -59,20 +59,20 @@ export class UsersComponent implements OnInit {
   sortType?: string;
   sortTarget?: HTMLElement;
 
+  femaleIcon = "app/assets/images/female.png";
+  maleIcon = "app/assets/images/female.png";
+
   ngOnInit() {
-    this.hideFilter = true;
     this.form = initElement(this.viewContainerRef, registerEvents);
-    const s = mergeFilter(buildFromUrl<UserFilter>(), this.filter, this.pageSizes, ['ctrlStatus', 'userType']);
+    const urlFilter = mergeFilter(buildFromUrl<UserFilter>(), this.filter, this.pageSizes, ['ctrlStatus', 'userType']);
     Promise.all([
       this.masterDataService.getStatus()
     ]).then(values => {
       const [status] = values;
       this.statusList = initStatusList(status);
-      const obj2 = initFilter(s, this);
-      this.filter = obj2;
-      setTimeout(() => {
-        this.search(true);
-      }, 0);
+      const filter = initFilter(urlFilter, this);
+      this.filter = filter;
+      this.search(true);
     }).catch(handleError);
   }
   sort(event: Event): void {
@@ -80,21 +80,19 @@ export class UsersComponent implements OnInit {
     this.search();
   }
   onPageSizeChanged(event: Event): void {
-    const ele = event.currentTarget as HTMLInputElement;
-    changePageSize(this, Number(ele.value));
+    changePageSize(this, getNumber(event));
     this.search();
   }
   onPageChanged(event?: any): void {
     changePage(this, event.page, event.itemsPerPage);
     this.search();
   }
-  searchOnClick(event: Event): void {
+  searchOnClick(event?: Event): void {
     reset(this);
     this.search();
   }
   search(isFirstLoad?: boolean) {
     showLoading();
-    debugger
     addParametersIntoUrl(this.filter, isFirstLoad, this.pageIndex);
     if (!this.fields) {
       this.fields = getFields(this.form);
@@ -102,7 +100,7 @@ export class UsersComponent implements OnInit {
     const offset = getOffset(this.pageSize, this.pageIndex);
     optimizeFilter(this.filter, this)
     
-    this.userService
+    this.service
       .search(this.filter, this.pageSize, offset, this.fields)
       .then((res) => {
         if (res.total) {
@@ -117,18 +115,18 @@ export class UsersComponent implements OnInit {
   }
 
   edit(userId: string) {
-    navigate(this.router, 'users', [userId]);
+    this.router.navigate(['users', userId]);
   }
   add() {
-    navigate(this.router, 'users/new');
+    this.router.navigate(['users/new']);
   }
-  changeView(v: string, event?: any): void {
-    this.view = v;
+  changeView(view: string): void {
+    this.view = view;
   }
-  toggleFilter(event: any): void {
+  toggleFilter(event: Event): void {
     this.hideFilter = handleToggle(event.target as HTMLInputElement, this.hideFilter)
   }
-  clearQ = () => {
+  clearQ() {
     this.filter.q = '';
   }
   includes(checkedList: Array<string> | string, v: string): boolean {
