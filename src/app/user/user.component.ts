@@ -1,14 +1,14 @@
 ﻿import { Component, OnInit, ViewContainerRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { StringMap, clone, createModel, initElement, isSuccessful, makeDiff } from 'angularx';
-import { formatter, registerEvents, showFormError, validateForm } from 'ui-plus';
-import { Status, confirm, emailOnBlur, handleError, numberOnFocus, phoneOnBlur, requiredOnBlur, useLocale, useResource } from 'uione';
+import { emailOnBlur, formatter, numberOnFocus, phoneOnBlur, registerEvents, requiredOnBlur, showFormError, validateForm } from 'ui-plus';
+import { Status, handleError, useLocale, useResource } from 'uione';
 import { Gender } from 'uione';
 import { MasterDataClient } from './service/master-data';
 import { User, UserClient } from './service/user';
 import { Item, Result } from 'onecore';
 import { hideLoading, showLoading } from 'ui-loading';
-import { alertError, alertSuccess, alertWarning } from 'ui-alert';
+import { alertError, alertSuccess, alertWarning, confirm } from 'ui-alert';
 
 function createUser(): User {
   const user = createModel<User>();
@@ -23,8 +23,9 @@ function createUser(): User {
 })
 export class UserComponent implements OnInit {
   constructor(private viewContainerRef: ViewContainerRef, private route: ActivatedRoute, private userService: UserClient, protected masterDataService: MasterDataClient) {
-    this.user = createUser();
     this.resource = useResource();
+    this.user = createUser();
+    this.originUser = createUser();
   }
   refForm?: HTMLFormElement;
   isReadOnly?: boolean;
@@ -32,7 +33,7 @@ export class UserComponent implements OnInit {
 
   resource: StringMap;
   id?: string;
-  originUser: User = {} as any;
+  originUser: User;
   user: User;
   titles: Item[] = [];
   positions: Item[] = [];
@@ -68,23 +69,20 @@ export class UserComponent implements OnInit {
       }
     }).catch(handleError);
   }
-  requiredOnBlur(event: any) {
+  requiredOnBlur(event: Event) {
     requiredOnBlur(event);
   }
-  numberOnFocus(event: any) {
+  numberOnFocus(event: Event) {
     numberOnFocus(event, useLocale());
   }
-  emailOnBlur(event: any) {
+  emailOnBlur(event: Event) {
     emailOnBlur(event);
   }
-  phoneOnBlur(event: any) {
+  phoneOnBlur(event: Event) {
     phoneOnBlur(event);
   }
   formatPhone(phone: string) {
     this.user.phone = formatter.formatPhone(phone);
-  }
-  getModelName(): string {
-    return 'user';
   }
   loadGender(user?: User) {
     user = user === undefined ? this.user : user;
