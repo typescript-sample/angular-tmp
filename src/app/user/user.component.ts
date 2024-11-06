@@ -9,7 +9,7 @@ import { User, UserClient } from './service/user';
 import { Item, Result } from 'onecore';
 import { hideLoading, showLoading } from 'ui-loading';
 import { alertError, alertSuccess, alertWarning, confirm } from 'ui-alert';
-import { goBack, hasDiff } from '../core';
+import { afterSaved, goBack, hasDiff } from '../core';
 
 function createUser(): User {
   const user = createModel<User>();
@@ -23,7 +23,7 @@ function createUser(): User {
   providers: [UserClient]
 })
 export class UserComponent implements OnInit {
-  constructor(private viewContainerRef: ViewContainerRef, private route: ActivatedRoute, private userService: UserClient, protected masterDataService: MasterDataClient) {
+  constructor(private viewContainerRef: ViewContainerRef, private route: ActivatedRoute, private service: UserClient, protected masterDataService: MasterDataClient) {
     this.resource = useResource();
     this.user = createUser();
     this.originUser = createUser();
@@ -56,7 +56,7 @@ export class UserComponent implements OnInit {
         this.originUser = clone(this.user);
       } else {
         showLoading();
-        this.userService
+        this.service
           .load(this.id)
           .then((user) => {
             if (user) {
@@ -110,9 +110,9 @@ export class UserComponent implements OnInit {
       confirm(this.resource.msg_confirm_save, () => {
         if (this.newMode) {
           showLoading();
-          this.userService
+          this.service
             .create(this.user)
-            .then((res) => this.afterSaved(res))
+            .then((res) => afterSaved(res, this.refForm, this.resource, showFormError, alertSuccess, alertError))
             .catch(handleError)
             .finally(hideLoading)
         } else {
@@ -122,25 +122,14 @@ export class UserComponent implements OnInit {
             alertWarning(this.resource.msg_no_change)
           } else {
             showLoading()
-            this.userService
+            this.service
               .update(this.user)
-              .then((res) => this.afterSaved(res))
+              .then((res) => afterSaved(res, this.refForm, this.resource, showFormError, alertSuccess, alertError))
               .catch(handleError)
               .finally(hideLoading)
           }
         }
       })
-    }
-  }
-  afterSaved(res: Result<User>): void {
-    if (Array.isArray(res)) {
-      showFormError(this.refForm, res)
-    } else if (isSuccessful(res)) {
-      alertSuccess(this.resource.msg_save_success, () => window.history.back())
-    } else if (res === 0) {
-      alertError(this.resource.error_not_found)
-    } else {
-      alertError(this.resource.error_conflict)
     }
   }
 }
