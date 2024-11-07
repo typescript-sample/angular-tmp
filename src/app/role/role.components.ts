@@ -220,7 +220,7 @@ export class RoleComponent implements OnInit {
     this.isReadOnly = !hasPermission(write, 1)
   }
   resource: StringMap;
-  refForm?: HTMLFormElement;
+  form?: HTMLFormElement;
   isReadOnly?: boolean;
   newMode?: boolean;
   id?: string;
@@ -241,7 +241,7 @@ export class RoleComponent implements OnInit {
   disabled?: boolean;
 
   ngOnInit() {
-    this.refForm = initElement(this.viewContainerRef, registerEvents);
+    this.form = initElement(this.viewContainerRef, registerEvents);
     this.id = this.route.snapshot.params.id;
     this.newMode = !this.id;
     Promise.all([
@@ -509,7 +509,7 @@ export class RoleComponent implements OnInit {
     }
   }
   validate(): boolean {
-    return validateForm(this.refForm, getLocale())
+    return validateForm(this.form, getLocale())
   }
   save(event: Event): void {
     event.preventDefault()
@@ -541,7 +541,7 @@ export class RoleComponent implements OnInit {
   }
   afterSaved(res: Result<Role>): void {
     if (Array.isArray(res)) {
-      showFormError(this.refForm?.current, res)
+      showFormError(this.form?.current, res)
     } else if (isSuccessful(res)) {
       alertSuccess(this.resource.msg_save_success, () => window.history.back())
     } else if (res === 0) {

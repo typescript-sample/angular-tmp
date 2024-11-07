@@ -1,6 +1,6 @@
 ﻿import { Component, OnInit, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { addParametersIntoUrl, buildFromUrl, buildMessage, changePage, changePageSize, clone, getFields, getNumber, getOffset, handleSortEvent, handleToggle, initElement, initFilter, mergeFilter, optimizeFilter, Pagination, reset, showPaging, Sortable} from 'angularx';
+import { addParametersIntoUrl, buildFromUrl, buildMessage, buildSort, changePage, changePageSize, clone, getFields, getNumber, getOffset, handleSortEvent, handleToggle, initElement, initFilter, mergeFilter, Pagination, reset, resources, showPaging, Sortable} from 'angularx';
 import { Permission, StringMap, getStatusName, handleError, hasPermission, showMessage, useResource } from 'uione';
 import { MasterDataClient } from './service/master-data';
 import { User, UserClient, UserFilter } from './service/user';
@@ -43,12 +43,11 @@ export class UsersComponent implements OnInit, Sortable, Pagination {
   filter: UserFilter = {} as any;
   list: User[] = [];
   fields?: string[];
+  view?: string;
 
   pageMaxSize = 7;
-  pageSizes: number[] = [10, 20, 40, 60, 100, 200, 400, 1000];
-
-  view?: string;
-  pageSize = 20;
+  pageSizes: number[] = resources.pages;
+  pageSize = resources.limit;
   pageIndex = 1;
   itemTotal = 0;
   pageTotal?: number;
@@ -64,13 +63,10 @@ export class UsersComponent implements OnInit, Sortable, Pagination {
 
   ngOnInit() {
     this.form = initElement(this.viewContainerRef, registerEvents);
-    const urlFilter = mergeFilter(buildFromUrl<UserFilter>(), this.filter, this.pageSizes, ['ctrlStatus', 'userType']);
-    Promise.all([
-      this.masterDataService.getStatus()
-    ]).then(values => {
-      const [status] = values;
+    const filter = mergeFilter(buildFromUrl<UserFilter>(), this.filter, this.pageSizes, ['ctrlStatus', 'userType']);
+    this.masterDataService.getStatus().then(status => {
       this.statusList = initStatusList(status);
-      const filter = initFilter(urlFilter, this);
+      initFilter(filter, this);
       this.filter = filter;
       this.search(true);
     }).catch(handleError);
@@ -94,18 +90,13 @@ export class UsersComponent implements OnInit, Sortable, Pagination {
   search(isFirstLoad?: boolean) {
     showLoading();
     addParametersIntoUrl(this.filter, isFirstLoad, this.pageIndex);
-    if (!this.fields) {
-      this.fields = getFields(this.form);
-    }
+    debugger
+    this.fields = getFields(this.form, this.fields);
     const offset = getOffset(this.pageSize, this.pageIndex);
-    optimizeFilter(this.filter, this)
-    
+    buildSort(this.filter, this)
     this.service
       .search(this.filter, this.pageSize, offset, this.fields)
       .then((res) => {
-        if (res.total) {
-          this.itemTotal = res.total;
-        }
         this.list = res.list;
         showPaging(this, res.list, this.pageSize, res.total);
         showMessage(buildMessage(this.resource, this.pageIndex, this.pageSize, res.list, res.total));

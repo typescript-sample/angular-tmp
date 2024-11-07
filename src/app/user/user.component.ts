@@ -29,7 +29,7 @@ export class UserComponent implements OnInit {
     this.isReadOnly = !hasPermission(write, 1)
   }
   resource: StringMap;
-  refForm?: HTMLFormElement;
+  form?: HTMLFormElement;
   isReadOnly?: boolean;
   newMode?: boolean;
   id?: string;
@@ -41,7 +41,7 @@ export class UserComponent implements OnInit {
   positions: Item[] = [];
 
   ngOnInit() {
-    this.refForm = initElement(this.viewContainerRef, registerEvents);
+    this.form = initElement(this.viewContainerRef, registerEvents);
     this.id = this.route.snapshot.params.id;
     this.newMode = !this.id;
     Promise.all([
@@ -63,7 +63,7 @@ export class UserComponent implements OnInit {
               this.originUser = clone(user);
               this.user = user;
               if (this.isReadOnly) {
-                setReadOnly(this.refForm)
+                setReadOnly(this.form)
               }
             } else {
               alertError(this.resource.error_404, () => window.history.back())
@@ -105,7 +105,7 @@ export class UserComponent implements OnInit {
     }
   }
   validate(): boolean {
-    return validateForm(this.refForm, useLocale())
+    return validateForm(this.form, useLocale())
   }
   save(event: Event): void {
     event.preventDefault()
@@ -137,7 +137,7 @@ export class UserComponent implements OnInit {
   }
   afterSaved(res: Result<User>): void {
     if (Array.isArray(res)) {
-      showFormError(this.refForm, res)
+      showFormError(this.form, res)
     } else if (isSuccessful(res)) {
       alertSuccess(this.resource.msg_save_success, () => window.history.back())
     } else if (res === 0) {

@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { addParametersIntoUrl, append, buildFilter, buildMessage, changePage, changePageSize, clone, enLocale, error, formatResults, getFields, handleAppend, handleSortEvent, initElement, initFilter, Locale, optimizeFilter, reset, SearchResult, showPaging } from 'angularx';
+import { addParametersIntoUrl, append, buildFilter, buildMessage, changePage, changePageSize, clone, enLocale, formatResults, getFields, handleAppend, handleSortEvent, initElement, initFilter, Locale, reset, SearchResult, showPaging } from 'angularx';
 import { hideLoading, showLoading } from 'ui-loading';
 import { getLocale, handleError, inputSearch, registerEvents, SearchParameter, showMessage, storage, StringMap, useResource } from 'uione';
 import { User, UserClient, UserFilter } from './service/user';
