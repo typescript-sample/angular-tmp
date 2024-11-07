@@ -90,7 +90,6 @@ export class UsersComponent implements OnInit, Sortable, Pagination {
   search(isFirstLoad?: boolean) {
     showLoading();
     addParametersIntoUrl(this.filter, isFirstLoad, this.pageIndex);
-    debugger
     this.fields = getFields(this.form, this.fields);
     const offset = getOffset(this.pageSize, this.pageIndex);
     buildSort(this.filter, this)
