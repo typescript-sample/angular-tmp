@@ -8,12 +8,12 @@
           </select>
 
           <input type='text' id='q' name='q' maxlength='255' [(ngModel)]='filter.q' placeholder={{resource.user_id}} />
-          <button type='button' [hidden]='!filter.q' class='btn-remove-text' (click)='clearUserId()'> </button>
-          <button type='submit' class='btn-search' (click)='onSearch($event)'></button>
+          <button type='button' [hidden]='!filter.q' class='btn-remove-text' (click)='clearQ()'> </button>
+          <button type='submit' class='btn-search' (click)='searchOnClick($event)'></button>
         </label>
         <pagination class='col s12 m6' id='pageIndex' name='pageIndex' *ngIf='showPaging' [(ngModel)]='pageIndex'
-          (pageChanged)='pageChanged($event)' [directionLinks]='false' [totalItems]='itemTotal' [maxSize]='pageMaxSize'
-          [itemsPerPage]='pageSize'>
+          (pageChanged)='onPageChanged($event)' [directionLinks]='false' [totalItems]='itemTotal'
+          [maxSize]='pageMaxSize' [itemsPerPage]='pageSize'>
         </pagination>
       </section>
     </form>
@@ -44,7 +44,8 @@
                 <td>{{user.displayName}}</td>
                 <td>{{user.status}}</td>
                 <td>
-                  <input type='checkbox' value='{{user.userId}}' (click)='onCheckUser($event)' />
+                  <input type='checkbox' value='{{user.userId}}' [checked]="includes(user.userId)"
+                    (click)='onCheckUser($event)' />
                 </td>
               </ng-container>
             </tr>

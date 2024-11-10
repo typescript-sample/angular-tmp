@@ -1,28 +1,12 @@
 ﻿import { Component, OnInit, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { addParametersIntoUrl, buildFromUrl, buildMessage, buildSort, changePage, changePageSize, clone, getFields, getNumber, getOffset, handleSortEvent, handleToggle, initElement, initFilter, mergeFilter, Pagination, reset, resources, showPaging, Sortable} from 'angularx';
+import { addParametersIntoUrl, buildFromUrl, buildMessage, buildSort, changePage, changePageSize, clone, getFields, getNumber, getOffset, handleSortEvent, handleToggle, initElement, initFilter, mergeFilter, Pagination, reset, resources, showPaging, Sortable } from 'angularx';
 import { Permission, StringMap, getStatusName, handleError, hasPermission, showMessage, useResource } from 'uione';
 import { MasterDataClient } from './service/master-data';
 import { User, UserClient, UserFilter } from './service/user';
 import { hideLoading, showLoading } from 'ui-loading';
 import { ValueText } from 'onecore';
 import { registerEvents } from 'ui-plus';
-
-interface StatusList {
-  value: string,
-  title?: string,
-}
-
-function initStatusList(values: ValueText[]): StatusList[] {
-  const sl: StatusList[] = [];
-  values.forEach((v) => {
-    sl.push({
-      value: v.value,
-      title: v.text ? v.text : getStatusName(v.value, useResource()),
-    })
-  })
-  return sl
-}
 
 @Component({
   selector: 'app-user-list',
@@ -36,7 +20,7 @@ export class UsersComponent implements OnInit, Sortable, Pagination {
   }
   resource: StringMap;
   form?: HTMLFormElement;
-  statusList: any[] = [];
+  statusList: ValueText[] = [];
   canWrite: boolean;
   hideFilter = true;
 
@@ -63,9 +47,9 @@ export class UsersComponent implements OnInit, Sortable, Pagination {
 
   ngOnInit() {
     this.form = initElement(this.viewContainerRef, registerEvents);
-    const filter = mergeFilter(buildFromUrl<UserFilter>(), this.filter, this.pageSizes, ['ctrlStatus', 'userType']);
+    const filter = mergeFilter(buildFromUrl<UserFilter>(), this.filter, this.pageSizes, ['status', 'userType']);
     this.masterDataService.getStatus().then(status => {
-      this.statusList = initStatusList(status);
+      this.statusList = status;
       initFilter(filter, this);
       this.filter = filter;
       this.search(true);
@@ -133,5 +117,8 @@ export class UsersComponent implements OnInit, Sortable, Pagination {
         this.filter.status = checkedList;
       }
     }
+  }
+  getStatusName(value: ValueText): string | undefined {
+    return value.text ? value.text : getStatusName(value.value, useResource())
   }
 }

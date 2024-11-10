@@ -87,9 +87,7 @@ export class RoleAssignmentsComponent implements OnInit {
   }
 
   onModelSave(arr: User[]) {
-    arr.map((user) => {
-      this.users.push(user);
-    });
+    this.users = arr;
     this.isOpenModel = false;
   }
   onModelClose() {

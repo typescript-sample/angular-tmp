@@ -41,9 +41,9 @@
           {{resource.status}}
           <section class='checkbox-group'>
             <label *ngFor="let item of statusList">
-              <input type='checkbox' (id)='item.title' (name)='item.title' (value)='item.value'
+              <input type='checkbox' (id)="'status_'+item.value" name='status' (value)='item.value'
                 (change)='onStatusChanged($event, item.value)' [checked]="includes(filter.status, item.value)" />
-              {{item.title}}
+              {{getStatusName(item)}}
             </label>
           </section>
         </label>

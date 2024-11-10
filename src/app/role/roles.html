@@ -13,26 +13,17 @@
     <form id='rolesForm' name='rolesForm' novalidate>
       <section class='row search-group'>
         <label class='col s12 m6 search-input'>
-          <!-- <section class='btn-group'>
-            <label>
-              {{resource.page_size}}
-              <select (change)='onPageSizeChanged($event)'>
-                <option *ngFor='let p of pageSizes' [value]='p' [selected]='p === pageSize'>{{p}}</option>
-              </select>
-            </label>
-          </section>  -->
-
           <select (change)='onPageSizeChanged($event)'>
             <option *ngFor='let p of pageSizes' [value]='p' [selected]='p === pageSize'>{{p}}</option>
           </select>
           <input type='text' id='q' name='q' maxlength='255' [(ngModel)]='filter.q' [placeholder]="resource.keyword" />
           <button type='button' [hidden]="!filter.q" class='btn-remove-text' (click)="clearQ()"></button>
           <button type='button' class='btn-filter' (click)="toggleFilter($event)"></button>
-          <button type='submit' class='btn-search' (click)="search($event)"></button>
+          <button type='submit' class='btn-search' (click)="searchOnClick($event)"></button>
         </label>
         <pagination id='limit1' name='limit' *ngIf='showPaging' [(ngModel)]='pageIndex'
-          (pageChanged)='onPageChanged($event)' (numPages)='pageIndex = $event' [directionLinks]='false'
-          [totalItems]='itemTotal' [maxSize]='pageMaxSize' [itemsPerPage]='pageSize'></pagination>
+          (pageChanged)='onPageChanged($event)' [directionLinks]='false' [totalItems]='itemTotal'
+          [maxSize]='pageMaxSize' [itemsPerPage]='pageSize'></pagination>
       </section>
       <section class="row search-group inline" [hidden]="hideFilter">
         <label class='col s12 m6'>
@@ -43,20 +34,11 @@
         <label class='col s12 m6'>
           {{resource.status}}
           <section class='checkbox-group'>
-            <label>
-              <input type='checkbox' id='active' name='status' value='A' [checked]="includes(filter.status, 'A')"
-                (change)='updateState($event)' />{{resource.active}}
+            <label *ngFor="let item of statusList">
+              <input type='checkbox' (id)="'status_'+item.value" name='status' (value)='item.value'
+                (change)='onStatusChanged($event, item.value)' [checked]="includes(filter.status, item.value)" />
+              {{getStatusName(item)}}
             </label>
-            <label>
-              <input type='checkbox' id='inactive' name='status' value='I' [checked]="includes(filter.status, 'I')"
-                (change)='updateState($event)' />
-              {{resource.inactive}}
-            </label>
-            <!-- <label *ngFor='let item of status; let i = index'>
-              <input [id]='item.value' type='checkbox' name='status' [checked]="includes(filter.status,item.value)"
-                [value]="item.value" (change)='updateState($event)' />
-              {{item.text}}
-            </label> -->
           </section>
         </label>
       </section>
